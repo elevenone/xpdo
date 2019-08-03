@@ -23,6 +23,12 @@ class Utils_Exception extends BaseException {
 	}
 }
 
+class DateTime_Exception extends BaseException {
+	public static function invalidTimestamp($timestamp) {
+		return self::createException('invalid timestamp, must be int %s', print_r($timestamp, true));
+	}
+}
+
 class Database_Exception extends BaseException {
 	public static function pdoIsNull() {
 		return self::createException('Database->_pdo = null');

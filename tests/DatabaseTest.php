@@ -2,6 +2,7 @@
 
 use aphp\XPDO\Database;
 use aphp\XPDO\Utils;
+use aphp\XPDO\DateTime;
 
 class User_object {
 	public $id;
@@ -18,6 +19,14 @@ class User_object {
 		$this->param1_v = $param1;
 		$this->param2_v = $param2;
 	}
+}
+
+class Time_object {
+	public $id;
+	public $name;
+	public $v_dateTime;
+	public $v_date;
+	public $v_time;
 }
 
 class DatabaseTest extends Base_TestCase {
@@ -291,6 +300,71 @@ class DatabaseTest extends Base_TestCase {
 		$statement->setJSONColumns([ 'email' ]);
 		$user = $statement->fetchOne();
 		$this->assertEquals( $json, $user );
+	}
+
+	public function test_dateType() {
+		$db = Database::getInstance();
+		$date = new DateTime('2019-10-22');
+		$time = new DateTime('13:55:59');
+		$dateTime = new DateTime('2019-10-22 13:55:59');
+		$dateTime2 = new DateTime('2019-11-22 14:55:59');
+		
+		// insert
+		$statement = $db->prepare("INSERT INTO timeTable ( `name`, `v_dateTime`, `v_date`, `v_time` ) VALUES ( 'name001', ?, ?, ? )");
+		$statement->bindValues([
+			$dateTime, $date, $time
+		]);
+		$statement->execute();
+
+		// insert named
+		$statement = $db->prepare("INSERT INTO timeTable ( `name`, `v_dateTime`, `v_date`, `v_time` ) VALUES ( 'name002', :p1, :p2, :p3 )");
+		$statement->bindNamedValues([
+			'p1' => $dateTime2, 'p2' => $date, 'p3' => $time
+		]);
+		$statement->execute();
+
+		// fetchLine - strings
+		$statement = $db->prepare("SELECT * FROM timeTable WHERE name = ?");
+		$statement->bindValues([
+			'name001'
+		]);
+		
+		$timeValue = $statement->fetchLine();
+		$this->assertTrue( $timeValue['v_dateTime'] == '2019-10-22 13:55:59' );
+		$this->assertTrue( $timeValue['v_date'] == '2019-10-22' );
+		$this->assertTrue( $timeValue['v_time'] == '13:55:59' );
+
+		// closeCursor - fetchAll - DateTime
+		$statement->_pdoStatement->closeCursor();
+		$statement->setDateColumns(['v_dateTime', 'v_date', 'v_time']);
+		$statement->bindValues([
+			'name002'
+		]);
+		
+		$timeValue = $statement->fetchAll();
+		$this->assertTrue( is_a($timeValue[0]['v_date'], DateTime::class) );
+		$this->assertTrue( $timeValue[0]['v_dateTime']->getText() == '2019-11-22 14:55:59' );
+
+		// fetchOne - DateTime
+		$statement = $db->prepare("SELECT v_dateTime FROM timeTable WHERE name = ?");
+		$statement->setDateColumns(['v_dateTime']);
+		$statement->bindValues([
+			'name002'
+		]);
+		
+		$timeValue = $statement->fetchOne();
+		$this->assertTrue( is_a($timeValue, DateTime::class) );
+		$this->assertTrue( $timeValue->getText() == '2019-11-22 14:55:59' );
+
+		// fetchObject - DateTime
+		$statement = $db->prepare("SELECT * FROM timeTable WHERE name = ?");
+		$statement->setDateColumns(['v_dateTime', 'v_date', 'v_time']);
+		$statement->bindValues([
+			'name001'
+		]);
+		$obj = $statement->fetchObject(Time_object::class);
+		$this->assertTrue( is_a($obj->v_time, DateTime::class) );
+		$this->assertTrue( $obj->v_dateTime->getText() == '2019-10-22 13:55:59' );
 	}
 }
 	

@@ -54,7 +54,7 @@ class user_json extends Model {
 class ModelTest extends Base_TestCase {
 	// STATIC
 	public static function setUpBeforeClass() {
-
+		Utils::$_jsonBindDetection = true;
 	}
 
 	public static function tearDownAfterClass() {

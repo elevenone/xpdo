@@ -14,6 +14,9 @@ abstract class ModelH {
 	static function jsonFields() {
 		return [];
 	}
+	static function dateFields() {
+		return [];
+	}
 	static function keyFieldAutoIncrement() {
 		return true;
 	}
@@ -69,8 +72,9 @@ class Model extends ModelH {
 		} else {
 			$statement = $db->prepare( "SELECT $select FROM $table WHERE $SQLWhere" );
 		}
-		// json conversion
+		// conversion
 		$statement->setJSONColumns( static::jsonFields() );
+		$statement->setDateColumns( static::dateFields() );
 		// --
 		if (count($params) > 0) {
 			if (strpos($statement->_query, '?') !== false) {
@@ -149,15 +153,17 @@ class Model extends ModelH {
 	}
 
 	static function loadWithStatement(Statement $statement) { // Model or null
-		// json conversion
+		// conversion
 		$statement->setJSONColumns( static::jsonFields() );
+		$statement->setDateColumns( static::dateFields() );
 		// --
 		return $statement->fetchObject( get_called_class() , [ self::LOADED_WITH_DB ]);
 	}
 
 	static function loadAllWithStatement(Statement $statement) { // [ Model ] or null
-		// json conversion
+		// conversion
 		$statement->setJSONColumns( static::jsonFields() );
+		$statement->setDateColumns( static::dateFields() );
 		// --
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB ]);
 	}

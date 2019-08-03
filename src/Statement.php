@@ -8,18 +8,21 @@ namespace aphp\XPDO;
 
 abstract class StatementH {
 	const TYPE_JSON = 'json';
+	const TYPE_DATE = 'date';
 	
 	public $_pdoStatement; // PDOStatement
 	public $_query;
 	public $_database; // aphp\XPDO\Database
 	public $_params = [];
 	protected $_jsonColumns = [];
+	protected $_dateColumns = [];
 
 	abstract public function bindNamedValue($name, $value); // Statement
 	abstract public function bindNamedValues($params); // Statement, $params = array()
 	abstract public function bindValues($params);      // Statement, $params = array()
 	
 	abstract public function setJSONColumns($colums); // $colums = array()
+	abstract public function setDateColumns($colums);
 
 	abstract public function execute(); // Statement
 
@@ -47,11 +50,8 @@ class Statement extends StatementH {
 
 	public function bindNamedValue($name, $value) {
 		$type = $this->getPDOParamType($value);
-		// json conversion
-		if ($type === self::TYPE_JSON) {
-			$value = Utils::jsonEncode($value);
-			$type = $this->getPDOParamType($value);
-		}
+		// conversion
+		$this->paramEncode($value, $type);
 		// --
 		$this->_pdoStatement->bindValue($name, $value, $type);
 		if ($this->logger) {
@@ -68,14 +68,10 @@ class Statement extends StatementH {
 	} 
 
 	public function bindValues($params) {  // $params = array()
-		// json conversion
-		if (Utils::$_jsonBindDetection) {
-			foreach ($params as &$value) {
-				$type = $this->getPDOParamType($value);
-				if ($type === self::TYPE_JSON) {
-					$value = Utils::jsonEncode($value);
-				}
-			}
+		foreach ($params as &$value) {
+			$type = $this->getPDOParamType($value);
+			// conversion
+			$this->paramEncode($value, $type);
 		}
 		// --
 		$this->executeValues = $params;
@@ -90,6 +86,13 @@ class Statement extends StatementH {
 	public function setJSONColumns($colums) {
 		if (is_array($colums)) {
 			$this->_jsonColumns = $colums;
+		}
+		return $this;
+	}
+
+	public function setDateColumns($colums) {
+		if (is_array($colums)) {
+			$this->_dateColumns = $colums;
 		}
 		return $this;
 	}
@@ -114,8 +117,9 @@ class Statement extends StatementH {
 		$this->execute();
 		$array = $this->_pdoStatement->fetchAll(\PDO::FETCH_ASSOC);
 		if (is_array($array) && count($array) > 0) {
-			// json conversion
-			$this->jsonColumnsDecode($array, 'fetchAll');
+			// conversion
+			$this->columnsDecode($array, 'fetchAll', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
+			$this->columnsDecode($array, 'fetchAll', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// ---
 			return $array;
 		}
@@ -126,8 +130,9 @@ class Statement extends StatementH {
 		$this->execute();
 		$array = $this->_pdoStatement->fetch(\PDO::FETCH_ASSOC);
 		if (is_array($array)) {
-			// json conversion
-			$this->jsonColumnsDecode($array, 'fetchLine');
+			// conversion
+			$this->columnsDecode($array, 'fetchLine', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
+			$this->columnsDecode($array, 'fetchLine', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// ---
 			return $array;
 		}
@@ -138,8 +143,9 @@ class Statement extends StatementH {
 		$this->execute();
 		$array = $this->_pdoStatement->fetch(\PDO::FETCH_NUM);
 		if (is_array($array) && count($array)>0) {
-			// json conversion
-			$this->jsonColumnsDecode($array[0], 'fetchOne');
+			// conversion
+			$this->columnsDecode($array[0], 'fetchOne', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
+			$this->columnsDecode($array[0], 'fetchOne', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// ---
 			return $array[0];
 		}
@@ -180,8 +186,9 @@ class Statement extends StatementH {
 			$object = $this->_pdoStatement->fetchObject($className);
 		}
 		if (is_a($object, $className)) {
-			// json conversion
-			$this->jsonColumnsDecode($object, 'fetchObject');
+			// conversion
+			$this->columnsDecode($object, 'fetchObject', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
+			$this->columnsDecode($object, 'fetchObject', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// --
 			return $object;
 		}
@@ -200,8 +207,9 @@ class Statement extends StatementH {
 			count($array) > 0 && 
 			is_a($array[0], $className)
 		) {
-			// json conversion
-			$this->jsonColumnsDecode($array, 'fetchAllObjects');
+			// conversion
+			$this->columnsDecode($array, 'fetchAllObjects', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
+			$this->columnsDecode($array, 'fetchAllObjects', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// --
 			return $array;
 		}
@@ -215,30 +223,41 @@ class Statement extends StatementH {
 		if (is_int($value))    return \PDO::PARAM_INT;
 		if (is_string($value)) return \PDO::PARAM_STR;
 		if (is_float($value)) return \PDO::PARAM_STR; // FLOAT is not exists
-		if (Utils::$_jsonBindDetection && is_array($value)) return self::TYPE_JSON;
 		if ($value == null)   return \PDO::PARAM_NULL;
+		if (Utils::$_jsonBindDetection && is_array($value)) return self::TYPE_JSON;
+		if (is_a($value, DateTime::class)) return self::TYPE_DATE;
 		throw Statement_Exception::bindInvalidType($value, $this->_query);
 	}
 	
-	protected function jsonColumnsDecode( &$fetchResult , $callMethod ) {
-		if (count($this->_jsonColumns) > 0) {
+	protected function columnsDecode( &$fetchResult , $callMethod, $columns, $decoderClosure ) {
+		if (count($columns) > 0) {
 			if ($callMethod == 'fetchAll' || $callMethod == 'fetchAllObjects') {
 				foreach ($fetchResult as &$value) {
-					$this->jsonColumnsDecode($value, 'fetchObject');
+					$this->columnsDecode($value, 'fetchObject', $columns, $decoderClosure);
 				}
 			} elseif ($callMethod == 'fetchObject' || $callMethod == 'fetchLine') {
-				foreach ($this->_jsonColumns as $column) {
+				foreach ($columns as $column) {
 					if (is_object($fetchResult)) {
 						// object
-						$fetchResult->{ $column } = Utils::jsonDecode($fetchResult->{ $column });
+						$fetchResult->{ $column } = call_user_func_array($decoderClosure, [ $fetchResult->{ $column } ]);
 					} else {
 						// array
-						$fetchResult[ $column ] = Utils::jsonDecode($fetchResult[ $column ]);
+						$fetchResult[ $column ] = call_user_func_array($decoderClosure, [ $fetchResult[ $column ] ]);
 					}
 				}
 			} elseif ($callMethod == 'fetchOne') {
-				$fetchResult = Utils::jsonDecode($fetchResult);
+				$fetchResult = call_user_func_array($decoderClosure, [ $fetchResult ]);
 			}
+		}
+	}
+
+	protected function paramEncode(&$value, &$type) {
+		if ($type === self::TYPE_JSON) {
+			$value = Utils::jsonEncode($value);
+			$type = $this->getPDOParamType($value);
+		} elseif ($type === self::TYPE_DATE) {
+			$value = $value->getText();
+			$type = $this->getPDOParamType($value);
 		}
 	}
 }

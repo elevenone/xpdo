@@ -17,6 +17,17 @@ abstract class DatabaseH {
 	abstract public function isMYSQL();
 	abstract public function isSQLite();
 	abstract public function getPDO(); // PDO
+
+	// Transaction
+	public function transactionBegin() { 
+		return $this->getPDO()->beginTransaction(); 
+	}
+	public function transactionCommit() { 
+		return $this->getPDO()->commit(); 
+	}
+	public function transactionRollBack() { 
+		return $this->getPDO()->rollBack(); 
+	}
 }
 
 # ------------------------------------

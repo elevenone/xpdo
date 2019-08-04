@@ -3,6 +3,11 @@
 ## Future
 * Documentation, test and code cleanup.
 
+## 1.0.9
+
+* Database: Added transaction functions.
+* Statement, model: Added date time fields support.
+
 ## 1.0.7
 
 * Model: Added multiple database support.

@@ -87,6 +87,7 @@ user Object
 * PSR logger support to debug queries.
 * Model like ORM.
 * JSON fields support.
+* Date fields support.
 
 ## Syntax
 
@@ -94,6 +95,7 @@ user Object
 **[Statement](#Statement)**<br>
 **[Model](#Model)**<br>
 **[JSON](#JSON)**<br>
+**[DateTime](#DateTime)**<br>
 **[Multiple Databases](#Multiple_Databases)**
 
 ### Database
@@ -123,6 +125,7 @@ $db->setLogger( $logger );
 **[Statement](#Statement)**<br>
 **[Model](#Model)**<br>
 **[JSON](#JSON)**<br>
+**[DateTime](#DateTime)**<br>
 **[Multiple Databases](#Multiple_Databases)**
 
 ### Statement
@@ -272,6 +275,7 @@ print_r($objects);
 **[Statement](#Statement)**<br>
 **[Model](#Model)**<br>
 **[JSON](#JSON)**<br>
+**[DateTime](#DateTime)**<br>
 **[Multiple Databases](#Multiple_Databases)**
 
 ### Model
@@ -414,6 +418,7 @@ $user->delete();
 **[Statement](#Statement)**<br>
 **[Model](#Model)**<br>
 **[JSON](#JSON)**<br>
+**[DateTime](#DateTime)**<br>
 **[Multiple Databases](#Multiple_Databases)**
 ### JSON
 
@@ -447,10 +452,63 @@ class user extends Model {
 	}
 }
 ```
+### DateTime
+DateTime class is used to store and edit the date time.
+```php
+class DateTime
+{
+	public function isTimeText($text);
+	public function isDateText($text);
+	public function isDateTimeText($text);
+
+	public function setText($text);
+	public function getText();
+
+	// dt = dateTime, d = date, t = time
+	public function setNow($dt = null);
+	public function setTimestamp(/* int */ $timestamp, $dt = null); 
+
+	public function getDate();
+	public function getTime();
+	public function getDT();
+	
+	public function getPHPDateTime(); // \DateTime
+	public function getTimestamp(); // int
+}
+```
+Bind date field value (INSERT, UPDATE).
+```php
+use aphp\XPDO\DateTime;
+// example of dateTime, date and time formats
+$dateTime = new DateTime('2019-11-22 14:55:59');
+$date = new DateTime('2019-11-22');
+$time = new DateTime('214:55:59');
+// api with bindNamedValue
+$statement->bindNamedValue('dateTime', $dateTime);
+// api with bindValues
+$statement->bindValues([ $dateTime, 'otherFieldValue', 'otherFieldValue' ]);
+```
+`SELECT` queries need to call `$statement->setDateColumns` before fetching.
+```php
+$statement->setDateColumns([ 'v_date' ]);
+$data = $statement->fetchLine();
+print_r($data['v_date']); // will see aphp\XPDO\DateTime
+```
+Models using `dateFields` to set DateTime fields
+```php
+class timeTable extends Model {
+	static function dateFields() {
+		return ['v_dateTime', 'v_date', 'v_time'];
+	}
+}
+```
+See [example05.php](example/example05.php) for more practice.
+
 **[Database](#Database)**<br>
 **[Statement](#Statement)**<br>
 **[Model](#Model)**<br>
 **[JSON](#JSON)**<br>
+**[DateTime](#DateTime)**<br>
 **[Multiple Databases](#Multiple_Databases)**
 ### Multiple_Databases
 

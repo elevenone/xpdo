@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `user_uniq` (
 
 DELETE FROM `user_uniq`;
 
-CREATE TABLE IF NOT EXISTS `timetable` (
+CREATE TABLE IF NOT EXISTS `timeTable` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `v_dateTime` datetime DEFAULT NULL,
@@ -32,4 +32,4 @@ CREATE TABLE IF NOT EXISTS `timetable` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DELETE FROM `timetable`;
+DELETE FROM `timeTable`;

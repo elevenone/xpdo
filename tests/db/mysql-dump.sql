@@ -33,3 +33,56 @@ CREATE TABLE IF NOT EXISTS `timeTable` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DELETE FROM `timeTable`;
+
+CREATE TABLE IF NOT EXISTS `book` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`category_id` INT(11) NULL DEFAULT NULL,
+	`name` VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE FROM `book`;
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (1, 1, 'Motherhood');
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (2, 1, 'Man');
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (3, 1, 'honor');
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (4, 3, 'Social mobility');
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (5, 3, 'Role of Religion');
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (6, 2, 'Pride');
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (7, 2, 'Power');
+
+CREATE TABLE IF NOT EXISTS `category` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`name` VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE FROM `category`;
+INSERT INTO `category` (`id`, `name`) VALUES (1, 'desire');
+INSERT INTO `category` (`id`, `name`) VALUES (2, 'chaos');
+INSERT INTO `category` (`id`, `name`) VALUES (3, 'capitalism');
+
+CREATE TABLE IF NOT EXISTS `tag` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`name` VARCHAR(50) NULL DEFAULT NULL,
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE FROM `tag`;
+INSERT INTO `tag` (`id`, `name`) VALUES (1, 'much');
+INSERT INTO `tag` (`id`, `name`) VALUES (2, 'question');
+INSERT INTO `tag` (`id`, `name`) VALUES (3, 'absolute');
+INSERT INTO `tag` (`id`, `name`) VALUES (4, 'best');
+INSERT INTO `tag` (`id`, `name`) VALUES (5, 'blog');
+
+CREATE TABLE IF NOT EXISTS `tagBook` (
+	`book_id` INT(11) NOT NULL,
+	`tag_id` INT(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE FROM `tagBook`;
+INSERT INTO `tagBook` (`book_id`, `tag_id`) VALUES (4, 2);
+INSERT INTO `tagBook` (`book_id`, `tag_id`) VALUES (4, 1);
+INSERT INTO `tagBook` (`book_id`, `tag_id`) VALUES (4, 4);
+INSERT INTO `tagBook` (`book_id`, `tag_id`) VALUES (3, 3);
+INSERT INTO `tagBook` (`book_id`, `tag_id`) VALUES (1, 2);
+INSERT INTO `tagBook` (`book_id`, `tag_id`) VALUES (1, 1);

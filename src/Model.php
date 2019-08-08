@@ -26,6 +26,9 @@ abstract class ModelH {
 	static function database() {
 		return Database::getInstance();
 	}
+	static function relations() {
+		return [];
+	}
 	// STATIC
 	static $_fields = []; // [className] = [ field, field, field ]
 
@@ -48,9 +51,12 @@ abstract class ModelH {
 	public $_model_isLoadedWithDB = false;
 	protected $_model_isDeleted = false;
 	public $_model_loadedFields = null;
+	protected $_model_relation = null;
 
 	abstract public function save($fields = []);
 	abstract public function delete();
+
+	abstract public function relation(); // Relation
 }
 
 # ------------------------------------
@@ -284,5 +290,15 @@ class Model extends ModelH {
 		if (is_string($keyField) && $keyFieldAutoIncrement) {
 			$this->{ $keyField } = static::lastId();
 		}
+	}
+
+	public function relation() // Relation
+	{
+		if (!$this->_model_relation) {
+			$relationClass = ModelConfig::$relationClass;
+			$this->_model_relation = new $relationClass(get_class($this));
+		}
+		$this->_model_relation->__model = $this;
+		return $this->_model_relation;
 	}
 }

@@ -13,6 +13,10 @@ class user extends Model {
 	*/
 }
 
+if (!file_exists(__DIR__ . '/sampleBase.sqlite')) {
+	copy(__DIR__ . '/../tests/db/sampleBase.sqlite', __DIR__ . '/sampleBase.sqlite');
+}
+
 $db = Database::getInstance();
 $db->SQLiteInit(__DIR__ . '/sampleBase.sqlite');
 

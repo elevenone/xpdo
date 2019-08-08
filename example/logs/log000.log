@@ -4,3 +4,9 @@
 # 2:42:17 2019-04-23 [0.010] INFO example01.php[37] SELECT * FROM `user` WHERE `id` = 3 LIMIT 1
 ----- LOG STARTED -----
 # 2:43:53 2019-04-23 [0.003] INFO example02.php[30] SELECT `id`, `name`, `email` FROM user WHERE id = 1
+----- LOG STARTED -----
+# 9:59:08 2019-08-08 [0.005] INFO example01.php[39] INSERT INTO `user` ( `name`, `email`, `gender`, `age`, `binary` ) VALUES ( 'user 1565251148', NULL, NULL, NULL, NULL )
+# 9:59:08 2019-08-08 [0.020] INFO example01.php[39] SELECT `id` FROM `user` ORDER BY `id` DESC LIMIT 1
+# 9:59:08 2019-08-08 [0.022] INFO example01.php[41] SELECT * FROM `user` WHERE `id` = 2 LIMIT 1
+----- LOG STARTED -----
+# 9:59:21 2019-08-08 [0.004] INFO example02.php[34] SELECT `id`, `name`, `email` FROM user WHERE id = 1

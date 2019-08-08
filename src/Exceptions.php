@@ -52,3 +52,21 @@ class Model_Exception extends BaseException {
 		return self::createException('update fields count = 0; className = %s; method = %s; existing key field cannot be overridden', $className, $method);
 	}
 }
+
+class Relation_Exception extends BaseException {
+	public static function invalidSyntax($relation) {
+		return self::createException('invalid relation syntax: "%s", example: "%s"', $relation, 'this->%field% [*-**|**] %namespace\class%->%field%');
+	}
+	public static function invalidSyntax2($relation) {
+		return self::createException('invalid relation syntax (manyToMany): "%s", example: "%s"', print_r($relation, true), 'this->%field% *-** %namespace\class%->%field% , %namespace\class%->%field% ** %namespace\class%->%field%');
+	}
+	public static function toManyRelationIsReadonly($className, $relation) {
+		return self::createException('"%s->relation()->%s" toMany relation is readonly, please use additional api to edit objects"', $className, $relation);
+	}
+	public static function undefined($relation) {
+		return self::createException('"%s" undefined relation', $relation);
+	}
+	public static function nullField($field) {
+		return self::createException('Field value "%s" is null', $field);
+	}
+}

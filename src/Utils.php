@@ -9,6 +9,9 @@ Utils::quoteColumns($columnOrColumns)
 Utils::selectColumns($columns)
 Utils::SQLite_tableColumns(\PDO $pdo, $table)
 Utils::MYSQL_tableColumns(\PDO $pdo, $table)
+
+Utils::sort(&$models, $field, $asc = true)
+Utils::sort2(&$models, $field1, $field2, $asc1 = true, $asc2 = true)
 */
 
 class Utils {
@@ -116,5 +119,21 @@ class Utils {
 		$query = preg_replace($keys, $values, $query, 1, $count);
 	
 		return $query;
+	}
+
+	static function sort(&$models, $field, $asc = true) 
+	{
+		usort($models, function ($a, $b) use ($field, $asc){
+			return $asc ? strnatcmp($a->{$field}, $b->{$field}) : strnatcmp($b->{$field}, $a->{$field});
+		});
+	}
+
+	static function sort2(&$models, $field1, $field2, $asc1 = true, $asc2 = true) 
+	{
+		usort($models, function ($a, $b) use ($field1, $field2, $asc1, $asc2) {
+			$rdiff = $asc1 ? strnatcmp($a->{$field1}, $b->{$field1}) : strnatcmp($b->{$field1}, $a->{$field1});
+			if ($rdiff) return $rdiff;
+			return $asc2 ? strnatcmp($a->{$field2}, $b->{$field2}) : strnatcmp($b->{$field2}, $a->{$field2});
+		});
 	}
 }

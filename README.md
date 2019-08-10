@@ -97,7 +97,7 @@ user Object
     [_model_isDeleted:protected] =>
 )
 ```
-## Syntax
+## Documentation
 <details><summary><b>&#x1F535; Database</b></summary>
 <p>
 
@@ -517,6 +517,188 @@ class User_db02 extends Model {
 	}
 }
 ```
+</p>
+</details>
+<details><summary><b>&#x1F535; Relation Class</b></summary>
+<p>
+
+```php
+class Relation {
+	public function toManyAdd($name, Model $relationModel);
+	public function toManyAddAll($name, $relationModels); // name, [ Model ]
+	public function toManyRemove($name, Model $relationModel);
+	public function toManyRemoveAll($name);
+	public function reset(); // reset property cache
+}
+```
+This class is created automatically while runtime calling the relations.
+```php
+// Read
+  $object = $model->relation()->%nameToOne%;
+  $objects = $model->relation()->%nameToMany%;
+  $objects = $model->relation()->%nameManyToMany%;
+// Write
+  $model->relation()->%nameToOne% = $object;
+// toMany write
+  $model->relation()->toManyAdd('%nameToMany%', $object);
+  $model->relation()->toManyAdd('%nameManyToMany%', $object);
+
+  $model->relation()->toManyAddAll('%nameToMany%', $objects);
+  $model->relation()->toManyAddAll('%nameManyToMany%', $objects);
+  
+  $model->relation()->toManyRemove('%nameToMany%', $object);
+  $model->relation()->toManyRemove('%nameManyToMany%', $object);
+
+  $model->relation()->toManyRemoveAll('%nameToMany%');
+  $model->relation()->toManyRemoveAll('%nameManyToMany%');
+```
+</p>
+</details>
+<details><summary><b>&#x1F535; Relations</b></summary>
+<p>
+
+### Configure
+
+Relations are configured by static method `relations()`.
+```
+// to one
+this->%field% ** %class%->%id%
+// to many
+this->%id% *-** %class%->%field%
+```
+Many to many used 2 rules.
+```
+this->%id% *-** %MiddleClass%->%field1%,
+%MiddleClass%->%field2% ** %class%->%id%
+```
+Class namespaces by default is autodetected.
+```php
+// autodetecting
+ModelConfig::modelClass_relation_namespace = 'auto'; 
+// set the namespace models
+ModelConfig::modelClass_relation_namespace = 'RT\Test\Sample'; 
+```
+Full namespace is allowed to set in rules.
+```
+this->%field% ** RT\Test\Sample\%class%->%id%
+```
+
+### Syntax to-one
+
+![toOne](images/001.png)
+
+```php
+class Category extends Model { }
+
+class Book extends Model {
+  static function relations() {
+    return [
+      'category' => 'this->category_id ** Category->id'
+    ];
+  }
+}
+```
+Read
+```php
+$book = Book::loadWithField('name', 'Role of Religion');
+$category = $book->relation()->category; // Category OR null
+```
+Write
+```php
+$book = Book::loadWithField('name', 'Role of Religion');
+$category = Category::loadWithField('name', 'capitalism');
+$book->relation()->category = $category;
+```
+Null
+```php
+$book->relation()->category = null;
+```
+### Syntax_to-many
+
+![toMany](images/002.png)
+
+```php
+class Category extends Model {
+  static function relations() {
+    return [
+      'books' => 'this->id *-** Book->category_id'
+    ];
+  }
+}
+
+class Book extends Model { }
+```
+Read
+```php
+$category = Category::loadWithField('name', 'capitalism');
+$books = $category->relation()->books; // [ Book ] OR [ ]
+```
+Write
+```php
+$category = Category::loadWithField('name', 'capitalism');
+$book = Book::loadWithField('name', 'Motherhood');
+$category->relation()->toManyAdd('books', $book);
+```
+Null
+```php
+$category = Category::loadWithField('name', 'capitalism');
+// self book
+$book1 = $books = $category->relation()->books[0];
+$category->relation()->toManyRemove('books', $book1);
+// book from database
+$book2 = Book::loadWithField('name', 'Motherhood');
+$category->relation()->toManyRemove('books', $book2);
+// all
+$category->relation()->toManyRemoveAll('books');
+```
+### Syntax many to many
+
+![manyToMany](images/003.png)
+
+```php
+class Book extends Model {
+  static function relations() {
+    return [
+      'tags' => [
+        'this->id *-** TagBook->book_id', 
+        'TagBook->tag_id ** Tag->id'
+      ]
+    ];
+  }
+}
+class Tag extends Model {
+  static function relations() {
+    return [
+      'books' => [
+        'this->id *-** TagBook->tag_id', 
+        'TagBook->book_id ** Book->id'
+      ]
+    ];
+  }
+}
+class TagBook extends Model {
+  static function keyField() {
+    return null; // optional, need testing for cases
+  }
+}
+```
+Api for `many-to-many` relations is same as `to-many`.
+
+**[Syntax_to-many](###Syntax_to-many)**
+
+Read (like toMany)
+```php
+$book = Book::loadWithField('name', 'Motherhood');
+$tags = $book->relation()->tags; // [ Tag ] OR [ ]
+```
+</p>
+</details>
+<details><summary><b>&#x1F535; Relations recomentations</b></summary>
+<p>
+
+* Write relation action performs <b>saving</b> model <b>immediately</b>.
+* Use Database::transactionBegin() to optimize the relations writing.
+* Use logger for debug, and see SQL queries.
 </p>
 </details>
 

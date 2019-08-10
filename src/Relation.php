@@ -6,17 +6,27 @@ abstract class RelationH {
 	abstract public function toManyAddAll($name, $relationModels); // name, [ Model ]
 	abstract public function toManyRemove($name, Model $relationModel);
 	abstract public function toManyRemoveAll($name);
-	abstract public function reset();
+	abstract public function reset(); // reset property cache
 
 /*
-Magic read
-	$relationObjects = $model->relation()->%relationNameToMany%;
-	$relationObject = $model->relation()->%relationNameToOne%;
-Magic write
-	$model->relation()->%relationNameToOne% = $relationObject;
-toMany write
-	$model->relation()->toManyAdd('%relationNameToMany%', $relationObject);
-	$model->relation()->toManyRemove('%relationNameToMany%', $relationObject);
+// Read
+  $object = $model->relation()->%nameToOne%;
+  $objects = $model->relation()->%nameToMany%;
+  $objects = $model->relation()->%nameManyToMany%;
+// Write
+  $model->relation()->%nameToOne% = $object;
+// toMany write
+  $model->relation()->toManyAdd('%nameToMany%', $object);
+  $model->relation()->toManyAdd('%nameManyToMany%', $object);
+
+  $model->relation()->toManyAddAll('%nameToMany%', $objects);
+  $model->relation()->toManyAddAll('%nameManyToMany%', $objects);
+  
+  $model->relation()->toManyRemove('%nameToMany%', $object);
+  $model->relation()->toManyRemove('%nameManyToMany%', $object);
+
+  $model->relation()->toManyRemoveAll('%nameToMany%');
+  $model->relation()->toManyRemoveAll('%nameManyToMany%');
 */
 }
 

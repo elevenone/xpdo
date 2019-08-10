@@ -3,6 +3,10 @@
 ## Future
 * Documentation, test and code cleanup.
 
+## 1.0.10
+
+* Implemented the relation api.
+
 ## 1.0.9
 
 * Database: Added transaction functions.

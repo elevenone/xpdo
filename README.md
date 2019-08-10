@@ -9,6 +9,7 @@
 
 `XPDO` - Simple PDO wrapper and object mapper with prepared statements.
 
+
 Supporting: MySQL, SQLite.
 
 ## Installation
@@ -16,14 +17,26 @@ PHP5.6 , PHP7.0+
 
 `composer require aphp/xpdo`
 
-## Hello world
+## Features
 
+* MYSQL, SQLite support.
+* Prepared statement syntax for queries.
+* Params values binding.
+* Syntax like PDO.
+* Model like ORM.
+* Relations support: one-to-one, one-to-many, many-to-many.
+* JSON fields support.
+* Date fields support.
+* PSR logger support for the query debugging.
+
+## Hello world
 This is the object configuration of sample code at the down.
 
-Class name `user` is equal to database table name `user`.<br>
-Keyfield `id` is default.<br>
-`Autoincrement` is default.<br>
-`JSONFields` is empty by default.
+* Class name `user` is equal to database table name `user`.
+* `keyField` is default (=id).
+* `keyFieldAutoIncrement` is default (=true).
+* `jsonFields`, `dateFields`, is empty by default. (=[])
+* `relations` is empty by default (=[]).
 
 Sample code:
 
@@ -45,6 +58,12 @@ class user extends Model {
 	}
 	static function jsonFields() {
 		return []; 
+	}
+	static function dateFields() {
+		return [];
+	}
+	static function relations() {
+		return [];
 	}
 	static function keyFieldAutoIncrement() {
 		return true; // false if auto increment is not used
@@ -78,29 +97,11 @@ user Object
     [_model_isDeleted:protected] =>
 )
 ```
-## Features
-
-* MYSQL, SQLite support.
-* Prepared statement syntax for queries.
-* Params values binding.
-* Syntax like PDO.
-* PSR logger support to debug queries.
-* Model like ORM.
-* JSON fields support.
-* Date fields support.
-
 ## Syntax
+<details><summary><b>&#x1F535; Database</b></summary>
+<p>
 
-**[Database](#Database)**<br>
-**[Statement](#Statement)**<br>
-**[Model](#Model)**<br>
-**[JSON](#JSON)**<br>
-**[DateTime](#DateTime)**<br>
-**[Multiple Databases](#Multiple_Databases)**
-
-### Database
-Initialization
-
+### Initialization
 ```php
 use aphp\XPDO\Database;
 
@@ -109,8 +110,7 @@ $db->SQLiteInit('sampleBase-temp.sqlite');
 // --
 $db->MySQLInit($user, $password, $database, 'localhost');
 ```
-
-Logger
+### Logger
 ```php
 use aphp\logger\FileLogger;
 
@@ -120,16 +120,12 @@ $logger->startLog();
 
 $db->setLogger( $logger );
 ```
+</p>
+</details>
+<details><summary><b>&#x1F535; Statement</b></summary>
+<p>
 
-**[Database](#Database)**<br>
-**[Statement](#Statement)**<br>
-**[Model](#Model)**<br>
-**[JSON](#JSON)**<br>
-**[DateTime](#DateTime)**<br>
-**[Multiple Databases](#Multiple_Databases)**
-
-### Statement
-Prepare
+### Prepare
 ```php
 use aphp\XPDO\Database;
 
@@ -137,18 +133,18 @@ $db = Database::getInstance();
 $statement1 = $db->prepare("SELECT `name` FROM user WHERE id = ?");
 $statement2 = $db->prepare("SELECT `name` FROM user WHERE id = :idvalue");
 ```
-Bind values
+### Bind values
 ```php
 $statement1->bindValues( [ 1 ] );
 
 $statement2->bindNamedValue( 'idvalue', 1 );
 $statement2->bindNamedValues( [ 'idvalue' => 1 ] );
 ```
-Execute
+### Execute
 ```php
 $statement1->execute(); // for UPDATE or INSERT queries
 ```
-Prepare-Bind-Execute
+### Prepare-Bind-Execute
 ```php
 use aphp\XPDO\Database;
 
@@ -157,17 +153,17 @@ $db->prepare("INSERT INTO user ( `name`, `email`, `gender`, `age` ) VALUES ( :na
    ->bindNamedValue( 'name', 'Donella Nelson' )
    ->execute();
 ```
-Fetch all - select all rows
+### Fetch all - select all rows
 ```php
 $result = $db->prepare("SELECT * FROM user")->fetchAll();
 print_r($result); // array[row][field]
 ```
-Fetch line - select first row
+### Fetch line - select first row
 ```php
 $result = $db->prepare("SELECT * FROM user")->fetchLine();
 print_r($result); // array[field]
 ```
-Fetch One - select first value in first row
+### Fetch One - select first value in first row
 ```php
 $result = $db->prepare("SELECT * FROM user")->fetchOne();
 print_r($result); // value
@@ -189,7 +185,7 @@ if ($result = $db->prepare("SELECT * FROM user WHERE id = 2304")->fetchAll()) {
 	var_dump($result); // NULL
 }
 ```
-Empty fetch line  
+### Empty fetch line  
 ```php
 if ($result = $db->prepare("SELECT * FROM user WHERE id = 2304")->fetchLine()) {
 	print_r($result); // array[field]
@@ -197,7 +193,7 @@ if ($result = $db->prepare("SELECT * FROM user WHERE id = 2304")->fetchLine()) {
 	var_dump($result); // NULL
 }
 ```
-Empty fetch one
+### Empty fetch one
 ```php
 if ($result = $db->prepare("SELECT * FROM user WHERE id = 2304")->fetchOne()) {
 	print_r($result); // value
@@ -226,10 +222,7 @@ $statement->bindNamedBlob('blob', $fp);
 $statement->bindNamedValue('id', 2);
 $statement->execute();
 ```
-### Statement-Object
-
-Fetch object 
-
+### Fetch object 
 ```php
 class User_object {
 	public $id;
@@ -260,9 +253,7 @@ User_object Object
     [param2_v] => p2
 )
 ```
-
-Fetch All object
-
+### Fetch All objects
 ```php
 $statement = $db->prepare("SELECT `id`, `name`, `email` FROM user");
 $objects = $statement->fetchAllObjects(User_object::class, [ 'p1', 'p2' ]);
@@ -270,18 +261,12 @@ $objects = $statement->fetchAllObjects(User_object::class, [ 'p1', 'p2' ]);
 print_r($objects);
 // $objects = array [objects]
 ```
+</p>
+</details>
+<details><summary><b>&#x1F535; Model</b></summary>
+<p>
 
-**[Database](#Database)**<br>
-**[Statement](#Statement)**<br>
-**[Model](#Model)**<br>
-**[JSON](#JSON)**<br>
-**[DateTime](#DateTime)**<br>
-**[Multiple Databases](#Multiple_Databases)**
-
-### Model
-
-new Model
-
+### new Model
 ```php
 use aphp\XPDO\Database;
 use aphp\XPDO\Model;
@@ -290,11 +275,9 @@ class user extends Model {
 	
 }
 
-
 $user = user::newModel();
 ```
-
-new Model - visible fields
+### new Model - visible fields
 ```php
 class user extends Model {
 	public $id;
@@ -307,34 +290,31 @@ class user extends Model {
 
 $user = user::newModel();
 ```
-new Model - key field
+### new Model - key field
 ```php
 class user extends Model {
 	static function keyField() {
 		return 'id';
 	}
 }
-
 $user = user::newModel();
 ```
-new Model - table name
+### new Model - table name
 ```php
 class user extends Model {
 	static function tableName() {
 		return 'user';
 	}
 }
-
 $user = user::newModel();
 ```
-new Model - key field auto increment
+### new Model - key field auto increment
 ```php
 class user extends Model {
 	static function keyFieldAutoIncrement() {
 		return true;
 	}
 }
-
 $user = user::newModel();
 ```
 ### Model - Save
@@ -414,15 +394,12 @@ Delete model from database, optimizing
 $user = user::loadWithId(1, [ user::keyField() ]);
 $user->delete();
 ```
-**[Database](#Database)**<br>
-**[Statement](#Statement)**<br>
-**[Model](#Model)**<br>
-**[JSON](#JSON)**<br>
-**[DateTime](#DateTime)**<br>
-**[Multiple Databases](#Multiple_Databases)**
-### JSON
+</p>
+</details>
+<details><summary><b>&#x1F535; JSON</b></summary>
+<p>
+JSON bind detection is enabled by default.
 
-Json bind detection is enabled by default.
 ```php
 Utils::$_jsonBindDetection = true;
 ```
@@ -452,8 +429,12 @@ class user extends Model {
 	}
 }
 ```
-### DateTime
+</p>
+</details>
+<details><summary><b>&#x1F535; DateTime</b></summary>
+<p>
 DateTime class is used to store and edit the date time.
+
 ```php
 class DateTime
 {
@@ -482,7 +463,7 @@ use aphp\XPDO\DateTime;
 // example of dateTime, date and time formats
 $dateTime = new DateTime('2019-11-22 14:55:59');
 $date = new DateTime('2019-11-22');
-$time = new DateTime('214:55:59');
+$time = new DateTime('14:55:59');
 // api with bindNamedValue
 $statement->bindNamedValue('dateTime', $dateTime);
 // api with bindValues
@@ -503,17 +484,13 @@ class timeTable extends Model {
 }
 ```
 See [example05.php](example/example05.php) for more practice.
-
-**[Database](#Database)**<br>
-**[Statement](#Statement)**<br>
-**[Model](#Model)**<br>
-**[JSON](#JSON)**<br>
-**[DateTime](#DateTime)**<br>
-**[Multiple Databases](#Multiple_Databases)**
-### Multiple_Databases
-
+</p>
+</details>
+<details><summary><b>&#x1F535; Multiple Databases</b></summary>
+<p>
 By the default used 1 instance of database.<br>
 To create `multiple` instances use sample code:
+
 ```php
 class DBStatic {
 	static $db1;
@@ -540,6 +517,8 @@ class User_db02 extends Model {
 	}
 }
 ```
+</p>
+</details>
 
 ## Test running
 
@@ -550,7 +529,9 @@ class User_db02 extends Model {
 
 On linux use *.sh files like *.bat files
 
-## Useful links: 
+<details><summary><b>&#x1F535; Useful links</b></summary>
+<p>
+
 * Cmd windows
 	* [WindowsPathEditor](https://rix0rrr.github.io/WindowsPathEditor/)
 	* [conemu](https://conemu.github.io/)
@@ -563,6 +544,9 @@ On linux use *.sh files like *.bat files
 * Git client
 	* [git](https://gitforwindows.org/)
 	* [smartgit](https://www.syntevo.com/smartgit/)
+
+</p>
+</details>
 
 ## More features
 For more features:

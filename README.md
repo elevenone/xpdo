@@ -693,7 +693,7 @@ $tags = $book->relation()->tags; // [ Tag ] OR [ ]
 ```
 </p>
 </details>
-<details><summary><b>&#x1F535; Relations recomentations</b></summary>
+<details><summary><b>&#x1F535; Relations recommendations</b></summary>
 <p>
 
 * Write relation action performs <b>saving</b> model <b>immediately</b>.
@@ -714,7 +714,7 @@ On linux use *.sh files like *.bat files
 <details><summary><b>&#x1F535; Useful links</b></summary>
 <p>
 
-* Cmd windows
+* CMD windows
 	* [WindowsPathEditor](https://rix0rrr.github.io/WindowsPathEditor/)
 	* [conemu](https://conemu.github.io/)
 * PHP in CMD

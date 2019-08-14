@@ -6,7 +6,8 @@ namespace aphp\XPDO;
 Utils::jsonEncode($value)
 Utils::jsonDecode($value)
 Utils::quoteColumns($columnOrColumns)
-Utils::selectColumns($columns)
+Utils::selectColumns($columns, $table = null) // $columns = array
+Utils::orderColumns($columns, $table, $prefix = ' ORDER BY ') // $columns = [ 'column' , true|false ]
 Utils::SQLite_tableColumns(\PDO $pdo, $table)
 Utils::MYSQL_tableColumns(\PDO $pdo, $table)
 
@@ -59,12 +60,38 @@ class Utils {
 		return $columnOrColumns;
 	}
 
-	static function selectColumns($columns) { // $columns = array
+	static function selectColumns($columns, $table = null) { // $columns = array
 		if (count($columns) > 0) {
 			$columns = self::quoteColumns($columns);
+			if ($table != null) {
+				$table = self::quoteColumns($table);
+				$columns = array_map(
+					function($column) use($table) { return "$table.$column"; },
+					$columns
+				);
+			}
 			return implode(', ', $columns);
 		}
+		if ($table != null) {
+			$table = self::quoteColumns($table);
+			return $table . '.*';
+		}
 		return '*';
+	}
+	
+	static function orderColumns($columns, $table, $prefix = ' ORDER BY ') { // $columns = [ 'column' , true|false ]
+		if (count($columns) > 0) {
+			$table = self::quoteColumns($table);
+			$columns = array_map(
+				function($column) use($table) {
+					$c = self::quoteColumns($column[0]);
+					return "$table.$c" . ($column[1] ? '' : ' DESC'); 
+				},
+				$columns
+			);
+			return $prefix . implode(', ', $columns);
+		}
+		return '';
 	}
 
 	static function SQLite_tableColumns(\PDO $pdo, $table) {

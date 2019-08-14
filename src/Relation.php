@@ -2,12 +2,16 @@
 namespace aphp\XPDO;
 
 abstract class RelationH {
+	public $_propertyCache; // = ModelConfig::$relationDefaultPropertyCache;
+
 	abstract public function toManyAdd($name, Model $relationModel);
 	abstract public function toManyAddAll($name, $relationModels); // name, [ Model ]
 	abstract public function toManyRemove($name, Model $relationModel);
 	abstract public function toManyRemoveAll($name);
 	abstract public function reset(); // reset property cache
 
+	abstract public function setFields(/*Array*/ $fields); // $this
+	abstract public function orderBy($field, $asc = true); // $this
 /*
 // Read
   $object = $model->relation()->%nameToOne%;
@@ -41,9 +45,13 @@ class Relation extends RelationH
 	protected $__modelClass;
 	protected $__modelNamespace = null;
 
+	protected $__paramFields = [];
+	protected $__paramOrderBy = [];
+
 	public function __construct($modelClass) 
 	{
 		$this->__modelClass = $modelClass;
+		$this->_propertyCache = ModelConfig::$relationDefaultPropertyCache;
 	}
 
 	protected function parseClassName($className) {
@@ -102,15 +110,22 @@ class Relation extends RelationH
 
 				$this->__functions_get[$name] = function($model) use($s, $relationClass2) 
 				{
+					$orderBy = Utils::orderColumns($this->__paramOrderBy, $s->table2);
+					//
+					$fields = Utils::selectColumns($this->__paramFields, $s->table2);
+					//
 					$statement = $s->db->prepare(
-"SELECT `{$s->table2}`.* 
+"SELECT $fields 
 FROM `{$s->table1}`, `{$s->table2}` 
 WHERE 
 	`{$s->table1}`.`{$s->relationClass1Field1}` = :modelField AND
-	`{$s->table1}`.`{$s->relationClass1Field2}` = `{$s->table2}`.`{$s->relationClass2Field}`"
+	`{$s->table1}`.`{$s->relationClass1Field2}` = `{$s->table2}`.`{$s->relationClass2Field}`$orderBy"
 					);
 					$statement->bindNamedValue('modelField', $model->{$s->modelField});
-					$result = $relationClass2::loadAllWithStatement($statement);
+					$result = $relationClass2::loadAllWithStatement($statement, $this->__paramFields);
+					//
+					$this->resetParams();
+					//
 					if (is_array($result)) return $result;
 					return [];
 				};
@@ -154,7 +169,12 @@ WHERE
 				if ($toMany) {
 					$this->__functions_get[$name] = function($model) use($field, $relationClass, $relationField) 
 					{
-						$result = $relationClass::loadAllWithWhereQuery("`$relationField` = :value", ['value' => $model->{$field}]);
+						$orderBy = Utils::orderColumns($this->__paramOrderBy, $relationClass::tableName());
+						//
+						$result = $relationClass::loadAllWithWhereQuery("`$relationField` = :value$orderBy", ['value' => $model->{$field}], $this->__paramFields);
+						//
+						$this->resetParams();
+						//
 						if (is_array($result)) return $result;
 						return [];
 					};
@@ -176,7 +196,10 @@ WHERE
 					// toOne
 					$this->__functions_get[$name] = function($model) use($field, $relationClass, $relationField) 
 					{
-						$result = $relationClass::loadWithField($relationField, $model->{$field});
+						$result = $relationClass::loadWithField($relationField, $model->{$field}, $this->__paramFields);
+						//
+						$this->resetParams();
+						//
 						return $result;
 					};
 					$this->__functions_set[$name] = function($model, $relationModel) use($field, $relationField, $modelClass) 
@@ -199,7 +222,7 @@ WHERE
 			}
 		}
 	}
-
+// To Many
 	public function toManyAdd($name, Model $relationModel) {
 		$this->parseRelationIfNeeded($name);
 		if (isset($this->__functions_add[$name])) {
@@ -245,6 +268,29 @@ WHERE
 
 	public function reset() {
 		$this->__values = [];
+		$this->resetParams();
+	}
+
+// --
+	public function setFields(/*Array*/ $fields) 
+	{
+		if (is_array($fields)) {
+			$this->__paramFields = $fields;
+			return $this;
+		}
+		throw Relation_Exception::invalidType('$fields must be an array');
+	}
+
+	public function orderBy($field, $asc = true) 
+	{
+		$this->__paramOrderBy[] = [ $field, $asc ];
+		return $this;
+	}
+
+	protected function resetParams() 
+	{
+		$this->__paramFields = [];
+		$this->__paramOrderBy = [];
 	}
 
 // Magic methods
@@ -264,7 +310,7 @@ WHERE
 	}
 	public function __get ( $name ) 
 	{
-		if (isset($this->__values[$name])) {
+		if (isset($this->__values[$name]) && $this->_propertyCache) {
 			return $this->__values[$name];
 		}
 		$this->parseRelationIfNeeded($name);

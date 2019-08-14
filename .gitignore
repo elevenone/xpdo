@@ -4,3 +4,4 @@ composer.lock
 *temp.sqlite
 *temp01.sqlite
 *temp02.sqlite
+dev-dir

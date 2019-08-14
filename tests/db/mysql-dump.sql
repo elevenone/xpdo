@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `book` (
 DELETE FROM `book`;
 INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (1, 1, 'Motherhood');
 INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (2, 1, 'Man');
-INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (3, 1, 'honor');
+INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (3, 1, 'Honor');
 INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (4, 3, 'Social mobility');
 INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (5, 3, 'Role of Religion');
 INSERT INTO `book` (`id`, `category_id`, `name`) VALUES (6, 2, 'Pride');

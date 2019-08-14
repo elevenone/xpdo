@@ -102,6 +102,83 @@ class RelationTest extends \Base_TestCase
 		ModelConfig::$modelClass_relation_namespace = 'auto';
 	}
 
+	public function test_relations_setFields() {
+		$category = Category::loadWithId(1);
+
+		$r = $category->relation();
+		$r->_propertyCache = false;
+
+		// to many
+		$books = $r->setFields(['name'])->books;
+		$this->assertTrue( $books[0]->_model_loadedFields == ['name']);
+		$books = $r->setFields(['id'])->books;
+		$this->assertTrue( $books[0]->_model_loadedFields == ['id']);
+		
+		// default
+		$books = $r->books;
+		$this->assertTrue( $books[0]->_model_loadedFields == []);
+
+		// many to many
+		$tag = Tag::loadWithId(2);
+		$r = $tag->relation();
+		$r->_propertyCache = false;
+
+		$books = $r->setFields(['name'])->books;
+		$this->assertTrue( $books[0]->_model_loadedFields == ['name']);
+		$books = $r->setFields(['id'])->books;
+		$this->assertTrue( $books[0]->_model_loadedFields == ['id']);
+
+		// to one 
+		$book = Book::loadWithId(1);
+		$r = $book->relation();
+		$r->_propertyCache = false;
+
+		$category = $r->setFields(['name'])->category;
+		$this->assertTrue( $category->_model_loadedFields == ['name']);
+		$category = $r->setFields(['id'])->category;
+		$this->assertTrue( $category->_model_loadedFields == ['id']);
+	}
+
+	public function test_relations_order() {
+		$category = Category::loadWithId(1);
+
+		$r = $category->relation();
+		$r->_propertyCache = false;
+
+		// to many
+		$books = $r->orderBy('name')->books;
+		$this->assertTrue( $books[0]->name == 'Honor');
+		$books = $r->orderBy('name', false)->books;
+		$this->assertTrue( $books[0]->name == 'Motherhood');
+
+		// to many - 2
+		$books = $r->orderBy('name')->books;
+		$mock = [];
+		foreach ($books as $book) {
+			$b = clone $book;
+			$b->save();
+			$mock[] = $b;
+		}
+		$books = $r->orderBy('name')->orderBy('id', false)->books;
+		$this->assertTrue( $books[5]->name == 'Motherhood' &&  $books[5]->id == '1');
+		$this->assertTrue( $books[4]->name == 'Motherhood');
+
+		// many to many
+		$tag = Tag::loadWithId(2);
+		$r = $tag->relation();
+		$r->_propertyCache = false;
+
+		$books = $r->orderBy('name')->books;
+		$this->assertTrue( $books[0]->name == 'Motherhood');
+		$books = $r->orderBy('name', false)->books;
+		$this->assertTrue( $books[0]->name == 'Social mobility');
+
+		// mock
+		foreach ($mock as $book) {
+			$book->delete();
+		}
+	}
+
 	public function test_write_toOne() {
 		$book = Book::loadWithField('name', 'Role of Religion');
 		$category = $book->relation()->category;

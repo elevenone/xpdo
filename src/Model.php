@@ -40,8 +40,8 @@ abstract class ModelH {
 	abstract  static function loadAllWithWhereQuery($SQLWhere, $params,  $fields = []) { } // [ Model ] or null
 	abstract  static function loadAll($fields = []) { } // [ Model ] or null
 	
-	abstract static function loadWithStatement(Statement $statement) { } // Model or null , 
-	abstract static function loadAllWithStatement(Statement $statement) { }  // [ Model ] or null
+	abstract static function loadWithStatement(Statement $statement, $fields = []) { } // Model or null , 
+	abstract static function loadAllWithStatement(Statement $statement, $fields = []) { }  // [ Model ] or null
 
 	abstract static function loadWithField( $field, $value, $fields = [],  $newModel = false ) { } // Model or null
 	abstract static function loadWithId( $value, $fields = [],  $newModel = false ) { } // Model or null
@@ -158,20 +158,20 @@ class Model extends ModelH {
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
-	static function loadWithStatement(Statement $statement) { // Model or null
+	static function loadWithStatement(Statement $statement, $fields = []) { // Model or null
 		// conversion
 		$statement->setJSONColumns( static::jsonFields() );
 		$statement->setDateColumns( static::dateFields() );
 		// --
-		return $statement->fetchObject( get_called_class() , [ self::LOADED_WITH_DB ]);
+		return $statement->fetchObject( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
-	static function loadAllWithStatement(Statement $statement) { // [ Model ] or null
+	static function loadAllWithStatement(Statement $statement, $fields = []) { // [ Model ] or null
 		// conversion
 		$statement->setJSONColumns( static::jsonFields() );
 		$statement->setDateColumns( static::dateFields() );
 		// --
-		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB ]);
+		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
 	static function loadWithField( $field, $value, $fields = [],  $newModel = false ) { // Model or null

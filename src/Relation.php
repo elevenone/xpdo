@@ -10,8 +10,8 @@ abstract class RelationH {
 	abstract public function toManyRemoveAll($name);
 	abstract public function reset(); // reset property cache
 
-	abstract public function setFields(/*Array*/ $fields); // $this
-	abstract public function orderBy($field, $asc = true); // $this
+	abstract public function setFields(/*Array*/ $fields); // -> $this
+	abstract public function orderBy($field, $asc = true); // -> $this
 /*
 // Read
   $object = $model->relation()->%nameToOne%;

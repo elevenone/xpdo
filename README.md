@@ -529,6 +529,9 @@ class Relation {
 	public function toManyRemove($name, Model $relationModel);
 	public function toManyRemoveAll($name);
 	public function reset(); // reset property cache
+
+	public function setFields(/*Array*/ $fields); // -> $this
+	public function orderBy($field, $asc = true); // -> $this
 }
 ```
 This class is created automatically while runtime calling the relations.
@@ -551,6 +554,22 @@ This class is created automatically while runtime calling the relations.
 
   $model->relation()->toManyRemoveAll('%nameToMany%');
   $model->relation()->toManyRemoveAll('%nameManyToMany%');
+```
+Setting load fields or order for relations.
+```php
+// Read , set load fields
+  $object = $model->relation()->setFields(['field1', 'field2'])->%nameToOne%;
+  $objects = $model->relation()->setFields(['field1', 'field2'])->%nameToMany%;
+// Read , set order
+  $objects = $model->relation()->orderBy('field1')->%nameToMany%;
+// Read , set order multiple fields
+  $objects = $model->relation()->
+    orderBy('field1')->orderBy('field2')->
+    %nameToMany%;
+// Read , set order , set fields
+  $objects = $model->relation()->
+   orderBy('field1')->setFields(['field1', 'field2'])->
+   %nameToMany%;
 ```
 </p>
 </details>

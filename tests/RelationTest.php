@@ -4,7 +4,7 @@ use aphp\XPDO\Database;
 use aphp\XPDO\Model;
 use aphp\XPDO\ModelConfig;
 use aphp\XPDO\Utils;
-use aphp\XPDO\Relation_Exception;
+use aphp\XPDO\XPDOException;
 
 class Category extends Model {
 	static function tableName() {
@@ -47,7 +47,7 @@ class Tag extends Model {
 			]
 		];
 	}
-	public $id = null; // special for Relation_Exception::nullField case
+	public $id = null; // special for XPDOException::nullField case
 }
 
 class TagBook extends Model {
@@ -321,55 +321,55 @@ class RelationTest extends \Base_TestCase
 		try {
 			$r = $book->relation()->invalid1;
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
-			$this->assertContains('invalid relation syntax', $e->getMessage() );
+		} catch (XPDOException $e) {
+			$this->assertContains('relation syntax', $e->getMessage() );
 		}
 		try {
 			$r = $book->relation()->invalid2;
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
-			$this->assertContains('invalid relation syntax (manyToMany)', $e->getMessage() );
+		} catch (XPDOException $e) {
+			$this->assertContains('relation syntax (manyToMany)', $e->getMessage() );
 		}
 		// toMany relation is readonly
 		try {
 			$book->relation()->tags = [];
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
+		} catch (XPDOException $e) {
 			$this->assertContains('toMany relation is readonly', $e->getMessage() );
 		}
 		// undefined get
 		try {
 			$r = $book->relation()->norelation;
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
+		} catch (XPDOException $e) {
 			$this->assertContains('undefined relation', $e->getMessage() );
 		}
 		// undefined set
 		try {
 			$book->relation()->norelation = 11;
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
+		} catch (XPDOException $e) {
 			$this->assertContains('undefined relation', $e->getMessage() );
 		}
 		// undefined toManyRemoveAll
 		try {
 			$book->relation()->toManyRemoveAll('norelation');
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
+		} catch (XPDOException $e) {
 			$this->assertContains('undefined relation', $e->getMessage() );
 		}
 		// undefined toManyRemove
 		try {
 			$book->relation()->toManyRemove('norelation', $book);
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
+		} catch (XPDOException $e) {
 			$this->assertContains('undefined relation', $e->getMessage() );
 		}
 		// undefined toManyAdd
 		try {
 			$book->relation()->toManyAdd('norelation', $book);
 			$this->assertTrue(false);
-		} catch (Relation_Exception $e) {
+		} catch (XPDOException $e) {
 			$this->assertContains('undefined relation', $e->getMessage() );
 		}
 	}

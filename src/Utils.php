@@ -30,7 +30,7 @@ class Utils {
 	static function jsonEncode($value) {
 		$value = json_encode($value, self::$_jsonEncodeOptions);
 		if ($value === false) {
-			throw Utils_Exception::jsonEncodeException($value);
+			throw XPDOException::jsonEncodeException($value);
 		}
 		return $value;
 	}
@@ -38,7 +38,7 @@ class Utils {
 	static function jsonDecode($value) {
 		$value = json_decode($value, true);
 		if ($value === null) {
-			throw Utils_Exception::jsonDecodeException($value);
+			throw XPDOException::jsonDecodeException($value);
 		}
 		return $value;
 	}
@@ -105,7 +105,7 @@ class Utils {
 			}
 			return $columns;
 		}
-		throw Utils_Exception::tableColumns($table);
+		throw XPDOException::tableFieldsError($table);
 	}
 
 	static function MYSQL_tableColumns(\PDO $pdo, $table) {
@@ -119,7 +119,7 @@ class Utils {
 			}
 			return $columns;
 		}
-		throw Utils_Exception::tableColumns($table);
+		throw XPDOException::tableFieldsError($table);
 	}
 
 	static function interpolateQuery($query, $params) {

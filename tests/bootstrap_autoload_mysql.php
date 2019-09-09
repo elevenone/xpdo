@@ -83,6 +83,7 @@ if ($result !== true) {
 copy(__DIR__ . '/db/sampleBase.sqlite', __DIR__ . '/db/sampleBase-temp.sqlite');
 copy(__DIR__ . '/db/sampleBase01.sqlite', __DIR__ . '/db/sampleBase-temp01.sqlite');
 copy(__DIR__ . '/db/sampleBase02.sqlite', __DIR__ . '/db/sampleBase-temp02.sqlite');
+@mkdir(__DIR__ . '/logs');
 
 // xpdo initialization
 

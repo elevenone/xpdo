@@ -156,7 +156,7 @@ WHERE
 					$statement->execute(); // saved
 				};
 			} else {
-				throw Relation_Exception::invalidSyntax2($relation);
+				throw XPDOException::invalidSyntax2Relation($relation);
 			}
 		} else {
 			// this->%id% *-** %\namespace\class%->%field%
@@ -218,7 +218,7 @@ WHERE
 					};
 				}
 			} else {
-				throw Relation_Exception::invalidSyntax($relation);
+				throw XPDOException::invalidSyntaxRelation($relation);
 			}
 		}
 	}
@@ -230,7 +230,7 @@ WHERE
 			$this->reset();
 			return;
 		}
-		throw Relation_Exception::undefined($name);
+		throw XPDOException::undefinedRelation($name);
 	}
 
 	public function toManyAddAll($name, $relationModels) {
@@ -250,7 +250,7 @@ WHERE
 			$this->reset();
 			return;
 		}
-		throw Relation_Exception::undefined($name);
+		throw XPDOException::undefinedRelation($name);
 	}
 
 	public function toManyRemoveAll($name) {
@@ -263,7 +263,7 @@ WHERE
 			}
 			return;
 		}
-		throw Relation_Exception::undefined($name);
+		throw XPDOException::undefinedRelation($name);
 	}
 
 	public function reset() {
@@ -278,7 +278,7 @@ WHERE
 			$this->__paramFields = $fields;
 			return $this;
 		}
-		throw Relation_Exception::invalidType('$fields must be an array');
+		throw XPDOException::invalidType('$fields must be an array');
 	}
 
 	public function orderBy($field, $asc = true) 
@@ -302,11 +302,11 @@ WHERE
 				$this->__functions_set[$name]($this->__model, $value);
 				$this->__values[$name] = $value;
 			} else {
-				throw Relation_Exception::toManyRelationIsReadonly($this->__modelClass, $name);
+				throw XPDOException::toManyRelationIsReadonly($this->__modelClass, $name);
 			}
 			return;
 		}
-		throw Relation_Exception::undefined($name);
+		throw XPDOException::undefinedRelation($name);
 	}
 	public function __get ( $name ) 
 	{
@@ -319,13 +319,13 @@ WHERE
 			$this->__values[$name] = $result;
 			return $result;
 		}
-		throw Relation_Exception::undefined($name);
+		throw XPDOException::undefinedRelation($name);
 		return null;
 	}
 // Exceptions
 	static function notNullField($field, $value) {
 		if (empty($value) || $value == null) {
-			throw Relation_Exception::nullField($field);
+			throw XPDOException::nullField($field);
 		}
 	}
 }

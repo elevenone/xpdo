@@ -3,6 +3,11 @@
 ## Future
 * Documentation, test and code cleanup.
 
+## 1.0.13 - 2019-09-09
+
+* Updated aphp/foundation to 2.0.
+* Refactored the exceptions code.
+
 ## 1.0.12 - 2019-08-17
 
 * Added "setField", "orderBy" methods for the relation api.

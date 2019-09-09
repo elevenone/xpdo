@@ -160,8 +160,8 @@ class ModelTest extends Base_TestCase {
 		try {
 			$obj->save();
 			$this->assertTrue( false );
-		} catch (aphp\XPDO\Model_Exception $ex) {
-			$this->assertTrue( true );
+		} catch (aphp\XPDO\XPDOException $ex) {
+			$this->assertContains('keyFieldIsNull', $ex->getMessage());
 		}
 	}
 	
@@ -227,8 +227,8 @@ class ModelTest extends Base_TestCase {
 		try {
 			$obj2->save();
 			$this->assertTrue( false );
-		} catch (aphp\XPDO\Model_Exception $e) {
-			$this->assertTrue( true );
+		} catch (aphp\XPDO\XPDOException $ex) {
+			$this->assertContains('emptyUpdateFields', $ex->getMessage());
 		}
 	}
 	

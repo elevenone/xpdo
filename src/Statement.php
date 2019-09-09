@@ -165,7 +165,7 @@ class Statement extends StatementH {
 	public function bindNamedBlobAsFilename($name, $filename) {
 		$fp = @fopen($filename, 'rb'); // read binary
 		if ($fp === false) {
-			throw Statement_Exception::bindNamedBlobAsFilenameException($name, $this->_query, $filename);
+			throw XPDOException::bindNamedBlobAsFilenameException($name, $this->_query, $filename);
 		}
 		$this->bindNamedBlob($name, $fp);
 	}
@@ -226,7 +226,7 @@ class Statement extends StatementH {
 		if ($value == null)   return \PDO::PARAM_NULL;
 		if (Utils::$_jsonBindDetection && is_array($value)) return self::TYPE_JSON;
 		if (is_a($value, DateTime::class)) return self::TYPE_DATE;
-		throw Statement_Exception::bindInvalidType($value, $this->_query);
+		throw XPDOException::bindInvalidType($value, $this->_query);
 	}
 	
 	protected function columnsDecode( &$fetchResult , $callMethod, $columns, $decoderClosure ) {

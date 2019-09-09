@@ -1,14 +1,13 @@
 # XPDO
 
 ![PHP Support](https://img.shields.io/badge/php%20tested-5.6-brightgreen.svg)
-![PHP Support](https://img.shields.io/badge/php%20tested-7.1-brightgreen.svg)
+![PHP Support](https://img.shields.io/badge/php%20tested-7-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Travis](https://api.travis-ci.org/GonistLelatel/xpdo.svg?branch=master)
 
 ## Introduction
 
 `XPDO` - Simple PDO wrapper and object mapper with prepared statements.
-
 
 Supporting: MySQL, SQLite.
 

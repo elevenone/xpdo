@@ -92,7 +92,7 @@ class DateTime extends DateTimeH
 			if ($dt == 'dt' || $dt == 'd') $this->date = substr($text, 0, 10);
 			if ($dt == 'dt' || $dt == 't') $this->time = substr($text, 11);
 		} else {
-			throw DateTime_Exception::invalidTimestamp($timestamp);
+			throw XPDOException::invalidTimestamp($timestamp);
 		}
 	}
 // get timestamp

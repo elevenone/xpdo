@@ -92,6 +92,6 @@ class Database extends DatabaseH {
 		if ($this->_pdo) {
 			return $this->_pdo;
 		}
-		throw Database_Exception::pdoIsNull();
+		throw XPDOException::pdoIsNull();
 	}
 }

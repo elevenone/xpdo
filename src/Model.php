@@ -234,7 +234,7 @@ class Model extends ModelH {
 		$i = 0;
 		$keyField = static::keyField();
 		if (!is_string($keyField)) {
-			throw Model_Exception::keyFieldIsNull( get_class() );
+			throw XPDOException::keyFieldIsNull( get_class() );
 		}
 		foreach ($fields as $column) {
 			if ($column == $keyField) {
@@ -246,7 +246,7 @@ class Model extends ModelH {
 			$i++;
 		}
 		if (count($set) == 0) {
-			throw Model_Exception::emptyUpdateFields(static::class, 'save_update');
+			throw XPDOException::emptyUpdateFields(static::class, 'save_update');
 		}
 		$where = Utils::quoteColumns($keyField) . ' = :keyvalue';
 		$params['keyvalue'] = $this->{ $keyField };

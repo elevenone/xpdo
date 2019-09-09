@@ -184,8 +184,8 @@ class DatabaseTest extends Base_TestCase {
 		try {
 			$db->prepare("SELECT `name` FROM user WHERE id = 1");
 			$this->assertTrue(false);
-		} catch (aphp\XPDO\Database_Exception $ex) {
-			$this->assertTrue(true);
+		} catch (aphp\XPDO\XPDOException $ex) {
+			$this->assertContains('pdoIsNull', $ex->getMessage());
 		}
 	}
 
@@ -195,8 +195,8 @@ class DatabaseTest extends Base_TestCase {
 		try {
 			$st->bindNamedValue('invalid', [ 'hello world' ]);
 			$this->assertTrue(false);
-		} catch (aphp\XPDO\Statement_Exception $ex) {
-			$this->assertTrue(true);
+		} catch (aphp\XPDO\XPDOException $ex) {
+			$this->assertContains('bindInvalidType', $ex->getMessage());
 		}
 	}
 
@@ -206,8 +206,8 @@ class DatabaseTest extends Base_TestCase {
 			$statement = $db->prepare("UPDATE user SET `binary` = :blob WHERE id = 2");
 			$statement->bindNamedBlobAsFilename('blob', __DIR__ . '/db/invalid.png');
 			$this->assertTrue(false);
-		} catch (aphp\XPDO\Statement_Exception $ex) {
-			$this->assertTrue(true);
+		} catch (aphp\XPDO\XPDOException $ex) {
+			$this->assertContains('bindNamedBlobAsFilenameException', $ex->getMessage());
 		}
 	}
 

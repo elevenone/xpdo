@@ -4,4 +4,5 @@ composer.lock
 *temp.sqlite
 *temp01.sqlite
 *temp02.sqlite
+tests/logs
 dev-dir

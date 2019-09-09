@@ -51,8 +51,8 @@ class DatetimeTest extends Base_TestCase {
 		try {
 			$d->setTimestamp('string', 'dt');
 			$this->assertTrue( false );
-		} catch (aphp\XPDO\DateTime_Exception $ex) {
-			$this->assertTrue( true );
+		} catch (aphp\XPDO\XPDOException $ex) {
+			$this->assertContains('invalidTimestamp', $ex->getMessage());
 		}
 	}
 

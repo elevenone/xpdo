@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace aphp\XPDO;
 
@@ -9,7 +9,7 @@ namespace aphp\XPDO;
 abstract class StatementH {
 	const TYPE_JSON = 'json';
 	const TYPE_DATE = 'date';
-	
+
 	public $_pdoStatement; // PDOStatement
 	public $_query;
 	public $_database; // aphp\XPDO\Database
@@ -20,13 +20,13 @@ abstract class StatementH {
 	abstract public function bindNamedValue($name, $value); // Statement
 	abstract public function bindNamedValues($params); // Statement, $params = array()
 	abstract public function bindValues($params);      // Statement, $params = array()
-	
+
 	abstract public function setJSONColumns($colums); // $colums = array()
 	abstract public function setDateColumns($colums);
 
 	abstract public function execute(); // Statement
 
-	abstract public function fetchAll(); // array[row][column] OR null
+	abstract public function fetchAll(); // array[row][column] OR (ModelConfig::$fetchAll_nullValue)
 	abstract public function fetchLine(); // array[column] OR null
 	abstract public function fetchOne(); // value OR null
 	abstract public function fetchLastId($table, $idColumn); // value OR null
@@ -38,7 +38,7 @@ abstract class StatementH {
 
 	// Object Interface
 	abstract public function fetchObject($className, $constructorParams = null); // object OR null
-	abstract public function fetchAllObjects($className, $constructorParams = null); // [object] OR null
+	abstract public function fetchAllObjects($className, $constructorParams = null); // [object] OR (ModelConfig::$fetchAll_nullValue)
 }
 
 # ------------------------------------
@@ -65,7 +65,7 @@ class Statement extends StatementH {
 			$this->bindNamedValue($name, $value);
 		}
 		return $this;
-	} 
+	}
 
 	public function bindValues($params) {  // $params = array()
 		foreach ($params as &$value) {
@@ -82,7 +82,7 @@ class Statement extends StatementH {
 	}
 
 	// --
-	
+
 	public function setJSONColumns($colums) {
 		if (is_array($colums)) {
 			$this->_jsonColumns = $colums;
@@ -123,7 +123,7 @@ class Statement extends StatementH {
 			// ---
 			return $array;
 		}
-		return null;
+		return ModelConfig::$fetchAll_nullValue;
 	}
 
 	public function fetchLine() {
@@ -203,8 +203,8 @@ class Statement extends StatementH {
 			$array = $this->_pdoStatement->fetchAll(\PDO::FETCH_CLASS, $className);
 		}
 		if (
-			is_array($array) && 
-			count($array) > 0 && 
+			is_array($array) &&
+			count($array) > 0 &&
 			is_a($array[0], $className)
 		) {
 			// conversion
@@ -213,11 +213,11 @@ class Statement extends StatementH {
 			// --
 			return $array;
 		}
-		return null;
+		return ModelConfig::$fetchAll_nullValue;
 	}
 
 	// PROTECTED
-	
+
 	protected $executeValues = null;
 	protected function getPDOParamType( &$value ) {
 		if (is_int($value))    return \PDO::PARAM_INT;
@@ -228,7 +228,7 @@ class Statement extends StatementH {
 		if (is_a($value, DateTime::class)) return self::TYPE_DATE;
 		throw XPDOException::bindInvalidType($value, $this->_query);
 	}
-	
+
 	protected function columnsDecode( &$fetchResult , $callMethod, $columns, $decoderClosure ) {
 		if (count($columns) > 0) {
 			if ($callMethod == 'fetchAll' || $callMethod == 'fetchAllObjects') {

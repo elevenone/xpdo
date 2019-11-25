@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace aphp\XPDO;
 
@@ -11,4 +11,5 @@ class ModelConfig {
 	static $relationClass = '\aphp\XPDO\Relation';
 	static $relationDefaultPropertyCache = true;
 	static $modelClass_relation_namespace = 'auto';
+	static $fetchAll_nullValue = [];
 }

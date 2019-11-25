@@ -3,6 +3,11 @@
 ## Future
 * Documentation, test and code cleanup.
 
+## 1.0.14 - 2019-11-25
+
+* Added default result value for fetchAll
+* Setted default table name to lower case
+
 ## 1.0.13 - 2019-09-09
 
 * Updated aphp/foundation to 2.0.

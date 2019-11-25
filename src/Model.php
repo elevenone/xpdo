@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace aphp\XPDO;
 
@@ -21,7 +21,8 @@ abstract class ModelH {
 		return true;
 	}
 	static function tableName() {
-		return (new \ReflectionClass(get_called_class()))->getShortName();
+		$rf = new \ReflectionClass( get_called_class() );
+		return \strtolower( $rf->getShortName() );
 	}
 	static function database() {
 		return Database::getInstance();
@@ -32,16 +33,16 @@ abstract class ModelH {
 	// STATIC
 	static $_fields = []; // [className] = [ field, field, field ]
 
-	/* 
-	abstract static function newModel() { } // Model 
+	/*
+	abstract static function newModel() { } // Model
 	abstract static function lastId() { } // value OR null
-	
+
 	abstract  static function loadWithWhereQuery($SQLWhere, $params,  $fields = []) { } // Model or null
-	abstract  static function loadAllWithWhereQuery($SQLWhere, $params,  $fields = []) { } // [ Model ] or null
-	abstract  static function loadAll($fields = []) { } // [ Model ] or null
-	
-	abstract static function loadWithStatement(Statement $statement, $fields = []) { } // Model or null , 
-	abstract static function loadAllWithStatement(Statement $statement, $fields = []) { }  // [ Model ] or null
+	abstract  static function loadAllWithWhereQuery($SQLWhere, $params,  $fields = []) { } // [ Model ] or (ModelConfig::$fetchAll_nullValue)
+	abstract  static function loadAll($fields = []) { } // [ Model ] or (ModelConfig::$fetchAll_nullValue)
+
+	abstract static function loadWithStatement(Statement $statement, $fields = []) { } // Model or null ,
+	abstract static function loadAllWithStatement(Statement $statement, $fields = []) { }  // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 
 	abstract static function loadWithField( $field, $value, $fields = [],  $newModel = false ) { } // Model or null
 	abstract static function loadWithId( $value, $fields = [],  $newModel = false ) { } // Model or null
@@ -108,7 +109,7 @@ class Model extends ModelH {
 		}
 		return $fields;
 	}
-	
+
 	// Constructor
 
 	public function __construct($isLoadedWithDB = false, $_model_loadedFields = []) {
@@ -145,15 +146,15 @@ class Model extends ModelH {
 	static function loadWithWhereQuery($SQLWhere, $params,  $fields = []) { // Model or null
 		$SQLWhere .= ' LIMIT 1';
 		$s = self::statementWithWhereQuery($SQLWhere, $params, $fields);
-		return $s->fetchObject( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);		
+		return $s->fetchObject( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
-	static function loadAllWithWhereQuery($SQLWhere, $params,  $fields = []) { // [ Model ] or null
+	static function loadAllWithWhereQuery($SQLWhere, $params,  $fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 		$statement = self::statementWithWhereQuery($SQLWhere, $params, $fields);
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
-	static function loadAll($fields = []) { // [ Model ] or null
+	static function loadAll($fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 		$statement = self::statementWithWhereQuery(null, [], $fields);
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
@@ -166,7 +167,7 @@ class Model extends ModelH {
 		return $statement->fetchObject( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
-	static function loadAllWithStatement(Statement $statement, $fields = []) { // [ Model ] or null
+	static function loadAllWithStatement(Statement $statement, $fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 		// conversion
 		$statement->setJSONColumns( static::jsonFields() );
 		$statement->setDateColumns( static::dateFields() );
@@ -216,7 +217,7 @@ class Model extends ModelH {
 			return false;
 		}
 		$table = Utils::quoteColumns( static::tableName() );
-		$where = Utils::quoteColumns(static::keyField()) . ' = :keyvalue'; 
+		$where = Utils::quoteColumns(static::keyField()) . ' = :keyvalue';
 		$query = "DELETE FROM $table WHERE $where";
 		$db = static::database();
 		$db->prepare($query)
@@ -229,7 +230,7 @@ class Model extends ModelH {
 
 	protected function save_update(&$fields) {
 		$db = static::database();
-		$set = []; 
+		$set = [];
 		$params = [];
 		$i = 0;
 		$keyField = static::keyField();
@@ -257,7 +258,7 @@ class Model extends ModelH {
 			->bindNamedValues($params)
 			->execute();
 	}
-	
+
 	protected function save_insert(&$fields) {
 		$db = static::database();
 		$table = Utils::quoteColumns( static::tableName() );
@@ -286,7 +287,7 @@ class Model extends ModelH {
 		$db->prepare($query)
 			->bindNamedValues($params)
 			->execute();
-		
+
 		if (is_string($keyField) && $keyFieldAutoIncrement) {
 			$this->{ $keyField } = static::lastId();
 		}

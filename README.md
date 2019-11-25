@@ -40,7 +40,7 @@ This is the object configuration of sample code at the down.
 Sample code:
 
 ```php
-<?php 
+<?php
 require 'vendor/autoload.php';
 
 use aphp\XPDO\Database;
@@ -56,7 +56,7 @@ class user extends Model {
 		return 'id'; // keyField custom name
 	}
 	static function jsonFields() {
-		return []; 
+		return [];
 	}
 	static function dateFields() {
 		return [];
@@ -168,23 +168,17 @@ $result = $db->prepare("SELECT * FROM user")->fetchOne();
 print_r($result); // value
 ```
 ### Statement-Empty
-If fetch results is empty, that can be checked by `IF` operator
+If fetch results is empty, that can be checked by `IF` operator<br>
+Empty value is configured by `ModelConfig::$fetchAll_nullValue = [];`<br>
 ```php
 $result = $db->prepare("SELECT * FROM user WHERE id = 2304")->fetchAll();
-if ($result) {
+if (count($result) != 0) {
 	print_r($result); // array[row][field]
 } else {
-	var_dump($result); // NULL
-}
-
-// one line syntax example
-if ($result = $db->prepare("SELECT * FROM user WHERE id = 2304")->fetchAll()) {
-	print_r($result); // array[row][field]
-} else {
-	var_dump($result); // NULL
+	var_dump($result); // []
 }
 ```
-### Empty fetch line  
+### Empty fetch line
 ```php
 if ($result = $db->prepare("SELECT * FROM user WHERE id = 2304")->fetchLine()) {
 	print_r($result); // array[field]
@@ -221,7 +215,7 @@ $statement->bindNamedBlob('blob', $fp);
 $statement->bindNamedValue('id', 2);
 $statement->execute();
 ```
-### Fetch object 
+### Fetch object
 ```php
 class User_object {
 	public $id;
@@ -271,7 +265,7 @@ use aphp\XPDO\Database;
 use aphp\XPDO\Model;
 
 class user extends Model {
-	
+
 }
 
 $user = user::newModel();
@@ -324,7 +318,7 @@ use aphp\XPDO\Database;
 use aphp\XPDO\Model;
 
 class user extends Model {
-	
+
 }
 
 $user = user::newModel();
@@ -354,7 +348,7 @@ Load with field and columns 'name' , 'email' (optimized)
 $user = user::loadWithField('name', 'userName', ['name', 'email']);
 ```
 ### Model - Select
-Using select queries for loading models 
+Using select queries for loading models
 ```php
 $statement = $db->prepare('SELECT * FROM user');
 $object = user::loadWithStatement($statement);
@@ -446,12 +440,12 @@ class DateTime
 
 	// dt = dateTime, d = date, t = time
 	public function setNow($dt = null);
-	public function setTimestamp(/* int */ $timestamp, $dt = null); 
+	public function setTimestamp(/* int */ $timestamp, $dt = null);
 
 	public function getDate();
 	public function getTime();
 	public function getDT();
-	
+
 	public function getPHPDateTime(); // \DateTime
 	public function getTimestamp(); // int
 }
@@ -547,7 +541,7 @@ This class is created automatically while runtime calling the relations.
 
   $model->relation()->toManyAddAll('%nameToMany%', $objects);
   $model->relation()->toManyAddAll('%nameManyToMany%', $objects);
-  
+
   $model->relation()->toManyRemove('%nameToMany%', $object);
   $model->relation()->toManyRemove('%nameManyToMany%', $object);
 
@@ -592,9 +586,9 @@ this->%id% *-** %MiddleClass%->%field1%,
 Class namespaces by default is autodetected.
 ```php
 // autodetecting
-ModelConfig::modelClass_relation_namespace = 'auto'; 
+ModelConfig::modelClass_relation_namespace = 'auto';
 // set the namespace models
-ModelConfig::modelClass_relation_namespace = 'RT\Test\Sample'; 
+ModelConfig::modelClass_relation_namespace = 'RT\Test\Sample';
 ```
 Full namespace is allowed to set in rules.
 ```
@@ -678,7 +672,7 @@ class Book extends Model {
   static function relations() {
     return [
       'tags' => [
-        'this->id *-** TagBook->book_id', 
+        'this->id *-** TagBook->book_id',
         'TagBook->tag_id ** Tag->id'
       ]
     ];
@@ -688,7 +682,7 @@ class Tag extends Model {
   static function relations() {
     return [
       'books' => [
-        'this->id *-** TagBook->tag_id', 
+        'this->id *-** TagBook->tag_id',
         'TagBook->book_id ** Book->id'
       ]
     ];

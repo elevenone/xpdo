@@ -223,6 +223,7 @@ class Statement extends StatementH {
 		if (is_int($value))    return \PDO::PARAM_INT;
 		if (is_string($value)) return \PDO::PARAM_STR;
 		if (is_float($value)) return \PDO::PARAM_STR; // FLOAT is not exists
+		if (is_bool($value)) return \PDO::PARAM_BOOL;
 		if ($value == null)   return \PDO::PARAM_NULL;
 		if (Utils::$_jsonBindDetection && is_array($value)) return self::TYPE_JSON;
 		if (is_a($value, DateTime::class)) return self::TYPE_DATE;

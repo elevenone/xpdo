@@ -37,8 +37,8 @@ abstract class ModelH {
 	abstract static function newModel() { } // Model
 	abstract static function lastId() { } // value OR null
 
-	abstract  static function loadWithWhereQuery($SQLWhere, $params,  $fields = []) { } // Model or null
-	abstract  static function loadAllWithWhereQuery($SQLWhere, $params,  $fields = []) { } // [ Model ] or (ModelConfig::$fetchAll_nullValue)
+	abstract  static function loadWithWhereQuery($SQLWhere, $params = [],  $fields = []) { } // Model or null
+	abstract  static function loadAllWithWhereQuery($SQLWhere, $params = [],  $fields = []) { } // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 	abstract  static function loadAll($fields = []) { } // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 
 	abstract static function loadWithStatement(Statement $statement, $fields = []) { } // Model or null ,
@@ -143,13 +143,13 @@ class Model extends ModelH {
 
 	// --
 
-	static function loadWithWhereQuery($SQLWhere, $params,  $fields = []) { // Model or null
+	static function loadWithWhereQuery($SQLWhere, $params = [],  $fields = []) { // Model or null
 		$SQLWhere .= ' LIMIT 1';
 		$s = self::statementWithWhereQuery($SQLWhere, $params, $fields);
 		return $s->fetchObject( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
-	static function loadAllWithWhereQuery($SQLWhere, $params,  $fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
+	static function loadAllWithWhereQuery($SQLWhere, $params = [],  $fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 		$statement = self::statementWithWhereQuery($SQLWhere, $params, $fields);
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}

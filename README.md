@@ -705,7 +705,27 @@ $tags = $book->relation()->tags; // [ Tag ] OR [ ]
 ```
 </p>
 </details>
-<details><summary><b>&#x1F535; Relations recommendations</b></summary>
+<details><summary><b>&#x1F535; Relation magic methods</b></summary>
+<p>
+
+Relation allows to use magic methods for model.<br>
+The magic methods are not using `$model->relation()` syntax for shorter code.<br>
+Syntax:
+```php
+$relationModel = $model->%relationName%;
+
+$model->%relationName% = $relationModel;
+
+$model->toManyAdd('%relationName%', $relationModel);
+$model->toManyAddAll('%relationName%', $relationModels);
+$model->toManyRemove('%relationName%', $relationModel);
+$model->toManyRemoveAll('%relationName%');
+
+$relationModels = $model->relation_orderBy('%field%', true|false)->%relationName%;
+```
+</p>
+</details>
+<details><summary><b>&#x1F535; Relation recommendations</b></summary>
 <p>
 
 * Write relation action performs <b>saving</b> model <b>immediately</b>.

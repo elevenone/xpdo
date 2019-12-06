@@ -26,7 +26,7 @@ class Book extends Model {
 			'category' => 'this->category_id ** Category->id',
 			'category_rt' => 'this->category_id ** RT\Test\Sample\Category->id',
 			'tags' => [
-				'this->id *-** TagBook->book_id', 
+				'this->id *-** TagBook->book_id',
 				'RT\Test\Sample\TagBook->tag_id ** Tag->id'
 			],
 			'invalid1' => 'invalid1',
@@ -42,7 +42,7 @@ class Tag extends Model {
 	static function relations() {
 		return [
 			'books' => [
-				'this->id *-** RT\Test\Sample\TagBook->tag_id', 
+				'this->id *-** RT\Test\Sample\TagBook->tag_id',
 				'TagBook->book_id ** Book->id'
 			]
 		];
@@ -61,7 +61,7 @@ class TagBook extends Model {
 
 // --- --- --- --- --- --- --- --- ---
 
-class RelationTest extends \Base_TestCase 
+class RelationTest extends \Base_TestCase
 {
 	// STATIC
 	public static function setUpBeforeClass() {
@@ -70,6 +70,64 @@ class RelationTest extends \Base_TestCase
 	public static function tearDownAfterClass() {
 
 	}
+
+	// for debug disable this "test_magicMethods", enable after debug is finished
+	// /*
+
+	public function test_magicMethods() {
+		// Read
+		$book = Book::loadWithField('name', 'Role of Religion');
+		$category = $book->category;
+		$category2 = $book->relation()->category;
+
+		$this->assertTrue( is_a($category, Category::class));
+		$this->assertTrue( $category->name == 'capitalism' );
+
+		// Order
+		$category = Category::loadWithId(1);
+		$books = $category->relation_orderBy('name', false)->books;
+		$this->assertTrue( $books[0]->name == 'Motherhood');
+
+		// write_toOne
+		$book = Book::loadWithField('name', 'Role of Religion');
+		$category = $book->category;
+		$this->assertTrue( is_a($category, Category::class));
+		$this->assertTrue( $category->name == 'capitalism' );
+
+		$cat_origin = $category;
+
+		$book->category = null;
+		$category = $book->category;
+		$this->assertTrue( $category == null );
+
+		$book->category = $cat_origin;
+		$category = $book->category;
+		$this->assertTrue( $category->name == 'capitalism' );
+
+		// test_write_toMany
+		$category = Category::loadWithField('id', 1);
+		$this->assertTrue( is_a($category, Category::class));
+
+		$books = $category->books;
+		$this->assertTrue( count($books) == 3 );
+
+		$newBook = Book::newModel();
+		$newBook->name = 'test_magicMethods';
+		$newBook->save();
+
+		$newBook = Book::loadWithField('name', 'test_magicMethods');
+		$this->assertTrue( is_a($newBook, Book::class));
+
+		$category->toManyAdd('books', $newBook);
+		$books = $category->books;
+		$this->assertTrue( count($books) == 4 );
+
+		$category->toManyRemove('books', $newBook);
+		$books = $category->books;
+		$this->assertTrue( count($books) == 3 );
+	}
+
+	// */
 
 	// tests
 	public function test_read() {
@@ -113,7 +171,7 @@ class RelationTest extends \Base_TestCase
 		$this->assertTrue( $books[0]->_model_loadedFields == ['name']);
 		$books = $r->setFields(['id'])->books;
 		$this->assertTrue( $books[0]->_model_loadedFields == ['id']);
-		
+
 		// default
 		$books = $r->books;
 		$this->assertTrue( $books[0]->_model_loadedFields == []);
@@ -128,7 +186,7 @@ class RelationTest extends \Base_TestCase
 		$books = $r->setFields(['id'])->books;
 		$this->assertTrue( $books[0]->_model_loadedFields == ['id']);
 
-		// to one 
+		// to one
 		$book = Book::loadWithId(1);
 		$r = $book->relation();
 		$r->_propertyCache = false;
@@ -193,13 +251,13 @@ class RelationTest extends \Base_TestCase
 		//
 		$book2 = Book::loadWithField('name', 'Role of Religion');
 		$this->assertTrue( $book2->category_id == null );
-		
+
 		$category = Category::loadWithField('name', 'capitalism');
 		$this->assertTrue( is_a($category, Category::class));
-		
+
 		$book2->relation()->category_rt = $category;
 		$this->assertTrue( $book2->relation()->category_rt == $category );
-		
+
 		$this->assertTrue( $book2->category_id == 3 );
 		$book2->save();
 		//
@@ -232,7 +290,7 @@ class RelationTest extends \Base_TestCase
 		$category2->relation()->toManyRemove('books', $b1);
 		$books = $category2->relation()->books;
 		$this->assertTrue( count($books) == 3 );
-		
+
 		$category2->relation()->toManyRemove('books', $b2);
 		$books = $category2->relation()->books;
 		$this->assertTrue( count($books) == 2 );
@@ -255,7 +313,7 @@ class RelationTest extends \Base_TestCase
 		$book = Book::loadWithField('name', 'Motherhood');
 		$this->assertTrue( is_a($book, Book::class) );
 		$tags = $book->relation()->tags;
-		
+
 		Utils::sort($tags, 'id');
 
 		$this->assertTrue( count($tags) == 2 );

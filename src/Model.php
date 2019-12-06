@@ -302,4 +302,42 @@ class Model extends ModelH {
 		$this->_model_relation->__model = $this;
 		return $this->_model_relation;
 	}
+
+	// Magic methods
+
+	public function __get( $id ) {
+		if (ModelConfig::$relationMagicMethods) {
+			$r = static::relations();
+			if (isset($r[$id])) {
+				return $this->relation()->{ $id };
+			}
+		}
+		if (isset($this->id)) {
+			return $this->id;
+		}
+		return null;
+	}
+
+	public function __set( $id, $val ) {
+		if (ModelConfig::$relationMagicMethods) {
+			$r = static::relations();
+			if (isset($r[$id])) {
+				$this->relation()->{ $id } = $val;
+				return;
+			}
+		}
+		$this->{ $id } = $val;
+	}
+
+	public function __call($name, $arguments) {
+		if (ModelConfig::$relationMagicMethods) {
+			if (in_array($name, ['toManyAdd', 'toManyAddAll', 'toManyRemove', 'toManyRemoveAll', 'relation_orderBy'])) {
+				if (strpos($name, 'relation_') === 0) {
+					$name = substr($name, strlen('relation_'));
+				}
+				return \call_user_func_array([$this->relation(), $name], $arguments);
+			}
+		}
+		return null;
+    }
 }

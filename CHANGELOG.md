@@ -3,6 +3,10 @@
 ## Future
 * Documentation, test and code cleanup.
 
+## 1.0.15 - 2019-12-6
+
+* Added relation magic methods.
+
 ## 1.0.14 - 2019-11-25
 
 * Added default result value for fetchAll

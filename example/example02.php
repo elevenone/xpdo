@@ -1,9 +1,9 @@
-<?php 
+<?php
 
 require __DIR__ . '/../vendor/autoload.php';
 
 use aphp\XPDO\Database;
-use aphp\logger\FileLogger;
+use aphp\Logger\FileLogger;
 
 class User_object {
 	public $id;

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace aphp\XPDO;
 
@@ -22,7 +22,7 @@ class Utils {
 		'traceLevel' => 10,
 		'traceTopFiles' => [ 'Statement.php', 'Database.php', 'Model.php' ]
 	];
-	
+
 	static $_jsonBindDetection = true;
 	static $_jsonEncodeOptions = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT;
 
@@ -34,15 +34,18 @@ class Utils {
 		}
 		return $value;
 	}
-	
+
 	static function jsonDecode($value) {
-		$value = json_decode($value, true);
+		if ($value === null) {
+			return $value;
+		}
+		$value = @json_decode($value, true);
 		if ($value === null) {
 			throw XPDOException::jsonDecodeException($value);
 		}
 		return $value;
 	}
-	
+
 	static function quoteColumns($columnOrColumns) {
 		if (is_array($columnOrColumns)) {
 			$columns = [];
@@ -78,14 +81,14 @@ class Utils {
 		}
 		return '*';
 	}
-	
+
 	static function orderColumns($columns, $table, $prefix = ' ORDER BY ') { // $columns = [ 'column' , true|false ]
 		if (count($columns) > 0) {
 			$table = self::quoteColumns($table);
 			$columns = array_map(
 				function($column) use($table) {
 					$c = self::quoteColumns($column[0]);
-					return "$table.$c" . ($column[1] ? '' : ' DESC'); 
+					return "$table.$c" . ($column[1] ? '' : ' DESC');
 				},
 				$columns
 			);
@@ -125,7 +128,7 @@ class Utils {
 	static function interpolateQuery($query, $params) {
 		$keys = array();
 		$values = $params;
-	
+
 		# build a regular expression for each parameter
 		foreach ($params as $key => $value) {
 			if (is_string($key)) {
@@ -133,28 +136,28 @@ class Utils {
 			} else {
 				$keys[] = '/[?]/';
 			}
-	
+
 			if (is_array($value))
 				$values[$key] = implode(',', $value);
-	
+
 			if (is_null($value))
 				$values[$key] = 'NULL';
 		}
 		// Walk the array to see if we can add single-quotes to strings
 		array_walk($values, function(&$v, $k) { if (!is_numeric($v) && $v!="NULL") $v = "'".$v."'"; });
 		$query = preg_replace($keys, $values, $query, 1, $count);
-	
+
 		return $query;
 	}
 
-	static function sort(&$models, $field, $asc = true) 
+	static function sort(&$models, $field, $asc = true)
 	{
 		usort($models, function ($a, $b) use ($field, $asc){
 			return $asc ? strnatcmp($a->{$field}, $b->{$field}) : strnatcmp($b->{$field}, $a->{$field});
 		});
 	}
 
-	static function sort2(&$models, $field1, $field2, $asc1 = true, $asc2 = true) 
+	static function sort2(&$models, $field1, $field2, $asc1 = true, $asc2 = true)
 	{
 		usort($models, function ($a, $b) use ($field1, $field2, $asc1, $asc2) {
 			$rdiff = $asc1 ? strnatcmp($a->{$field1}, $b->{$field1}) : strnatcmp($b->{$field1}, $a->{$field1});

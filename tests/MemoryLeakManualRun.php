@@ -30,7 +30,7 @@ $db->SQLiteInit(__DIR__ . '/db/sampleBase-temp.sqlite');
 
 file_put_contents(__DIR__ . '/logs/log000.log', ''); // clear logs
 
-$logger = aphp\logger\FileLogger::getInstance();
+$logger = aphp\Logger\FileLogger::getInstance();
 $logger->configure(__DIR__ . '/logs/log', true, 10102500);
 $logger->startLog();
 

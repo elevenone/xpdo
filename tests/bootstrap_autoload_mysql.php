@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /*
 https://phpunit.de/getting-started/phpunit-5.html
@@ -50,9 +50,9 @@ function mysqli_import_sql( &$dump , $dbhost, $dbuser, $dbpass ) {
 
 	if( $mysqli && ! $mysqli->error ) {
 		@$mysqli->close();
-		return true; 
-	} 
-	return false;  
+		return true;
+	}
+	return false;
 }
 
 // --
@@ -90,7 +90,7 @@ copy(__DIR__ . '/db/sampleBase02.sqlite', __DIR__ . '/db/sampleBase-temp02.sqlit
 $db = Database::getInstance();
 $db->MySQLInit($config['user'], $config['password'], 'testbase', $config['server']);
 
-$logger = aphp\logger\FileLogger::getInstance();
+$logger = aphp\Logger\FileLogger::getInstance();
 $logger->configure(__DIR__ . '/logs/log');
 $logger->startLog();
 
@@ -99,6 +99,6 @@ $db->setLogger( $logger );
 class Base_TestCase extends PHPUnit_Framework_TestCase {
 	// override
 	protected function setUp() {
-		aphp\logger\FileLogger::getInstance()->debug( get_class($this) . '::' . $this->getName() );
+		aphp\Logger\FileLogger::getInstance()->debug( get_class($this) . '::' . $this->getName() );
 	}
 }

@@ -256,6 +256,43 @@ print_r($objects);
 ```
 </p>
 </details>
+<details><summary><b>&#x1F535; Statement - cache</b></summary>
+<p>
+Database supported the cached results for statements.<br>
+To enable this feature use this code:
+
+```php
+$db->setFetchCacheEnabled(true);
+```
+
+All next `SELECT` queries are cached, and not execute twice.
+This feature is useful with relation models, for increase the performance of virtual fields.
+
+```php
+$statement = $db->prepare('SELECT * FROM user WHERE id = 1');
+$statement->__objectID = 'statementID';
+$user = $statement->fetchLine();
+//
+$statement2 = $db->prepare('SELECT * FROM user WHERE id = 1');
+$user = $statement2->fetchLine(); // load from cache
+
+//
+var_dump($statement == $statement2); // true, cache enabled, statement instance not create twice
+var_dump($statement2->__objectID == 'statementID');  // true
+var_dump($statement2->_cached == true);  // true, cache feature is enabled
+```
+
+If `UPDATE` , `INSERT` or any non `SELECT` query executed, then cache will reset.<br>
+For manual reset use:
+```php
+$db->resetFetchCache();
+```
+For disable caching use:
+```php
+$db->setFetchCacheEnabled(false);
+```
+</p>
+</details>
 <details><summary><b>&#x1F535; Model</b></summary>
 <p>
 

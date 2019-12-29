@@ -3,6 +3,10 @@
 ## Future
 * Documentation, test and code cleanup.
 
+## 1.0.16 - 2019-12-29
+
+* Added statement cache.
+
 ## 1.0.15 - 2019-12-6
 
 * Added relation magic methods.

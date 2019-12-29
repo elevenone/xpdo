@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace aphp\XPDO;
 
@@ -10,7 +10,7 @@ abstract class DatabaseH {
 	abstract public function SQLiteInit($fileName);
 	abstract public function MySQLInit($user, $password, $dbname, $host = 'localhost');
 
-	abstract public function prepare($queryString); // aphp\XPDO\Statement; 
+	abstract public function prepare($queryString); // aphp\XPDO\Statement;
 	abstract public function exec($queryString); // int
 	abstract public function fetchLastId($table, $idColumn); // value OR null ??
 
@@ -18,15 +18,18 @@ abstract class DatabaseH {
 	abstract public function isSQLite();
 	abstract public function getPDO(); // PDO
 
+	abstract public function setFetchCacheEnabled($enabled);
+	abstract public function resetFetchCache();
+
 	// Transaction
-	public function transactionBegin() { 
-		return $this->getPDO()->beginTransaction(); 
+	public function transactionBegin() {
+		return $this->getPDO()->beginTransaction();
 	}
-	public function transactionCommit() { 
-		return $this->getPDO()->commit(); 
+	public function transactionCommit() {
+		return $this->getPDO()->commit();
 	}
-	public function transactionRollBack() { 
-		return $this->getPDO()->rollBack(); 
+	public function transactionRollBack() {
+		return $this->getPDO()->rollBack();
 	}
 }
 
@@ -42,6 +45,7 @@ class Database extends DatabaseH {
 	protected $_pdo = null; // PDO
 	protected $_isMYSQL = false;
 	protected $_isSQLite = false;
+	public $_fetchCache = null;
 
 	// PUBLIC
 	public function SQLiteInit($fileName) {
@@ -58,6 +62,18 @@ class Database extends DatabaseH {
 
 	public function prepare($queryString) {
 		$pdo = $this->getPDO();
+		// -- cacheLogic
+		$selectQuery = is_array($this->_fetchCache) && preg_match('#^SELECT#i', $queryString);
+		$queryHash = '';
+		if ($selectQuery) {
+			$queryHash = md5($queryString);
+			if ($statement = @$this->_fetchCache[$queryHash]) {
+				return $statement;
+			}
+		} else {
+			$this->resetFetchCache();
+		}
+		// --
 		$statement = new Statement();
 		$statement->_query = $queryString;
 		$statement->_database = $this;
@@ -65,6 +81,12 @@ class Database extends DatabaseH {
 		if ($this->logger) {
 			$statement->setLogger($this->logger);
 		}
+		// -- cacheLogic
+		if ($selectQuery) {
+			$this->_fetchCache[$queryHash] = $statement;
+			$statement->_cached = true;
+		}
+		// --
 		return $statement;
 	}
 
@@ -83,7 +105,7 @@ class Database extends DatabaseH {
 	public function isMYSQL() {
 		return $this->_isMYSQL;
 	}
-	
+
 	public function isSQLite() {
 		return $this->_isSQLite;
 	}
@@ -93,5 +115,15 @@ class Database extends DatabaseH {
 			return $this->_pdo;
 		}
 		throw XPDOException::pdoIsNull();
+	}
+
+	public function setFetchCacheEnabled($enabled) {
+		$this->_fetchCache = $enabled ? [] : null;
+	}
+
+	public function resetFetchCache() {
+		if (is_array($this->_fetchCache)) {
+			$this->_fetchCache = [];
+		}
 	}
 }

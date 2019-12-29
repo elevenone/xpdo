@@ -9,6 +9,7 @@ namespace aphp\XPDO;
 abstract class StatementH {
 	const TYPE_JSON = 'json';
 	const TYPE_DATE = 'date';
+	const NOVALUE = '___-666__';
 
 	public $_pdoStatement; // PDOStatement
 	public $_query;
@@ -16,6 +17,11 @@ abstract class StatementH {
 	public $_params = [];
 	protected $_jsonColumns = [];
 	protected $_dateColumns = [];
+
+	// cache control
+	public $_cached = false;
+	public $_cachedResult = [];
+	public $_cachedResult_value = StatementH::NOVALUE;
 
 	abstract public function bindNamedValue($name, $value); // Statement
 	abstract public function bindNamedValues($params); // Statement, $params = array()
@@ -98,10 +104,28 @@ class Statement extends StatementH {
 	}
 
 	public function execute() {
+		$query = Utils::interpolateQuery($this->_query, $this->_params);
 		if ($this->logger) {
-			$query = Utils::interpolateQuery($this->_query, $this->_params);
 			$this->logger->info($query, Utils::$_logContext);
 		}
+		// --
+		if ($this->_cached) {
+			$hash = md5($query);
+			if (!isset($this->_cachedResult[ $hash ])) {
+				$this->_cachedResult[ $hash ] = Statement::NOVALUE;
+			}
+			$this->_cachedResult_value = &$this->_cachedResult[ $hash ];
+			if ($this->_cachedResult_value != Statement::NOVALUE) {
+				if ($this->logger) {
+					$this->logger->info('FETCH CACHED', Utils::$_logContext);
+				}
+				return $this;
+			}
+		} else {
+			unset($this->_cachedResult_value); // disable link
+			$this->_cachedResult_value = Statement::NOVALUE;
+		}
+		// --
 		if (is_array($this->executeValues)) {
 			$this->_pdoStatement->execute( $this->executeValues );
 			$this->executeValues = null;
@@ -115,12 +139,18 @@ class Statement extends StatementH {
 
 	public function fetchAll() {
 		$this->execute();
+		// --
+		if ($this->_cachedResult_value != Statement::NOVALUE) {
+			return $this->_cachedResult_value;
+		}
+		// --
 		$array = $this->_pdoStatement->fetchAll(\PDO::FETCH_ASSOC);
 		if (is_array($array) && count($array) > 0) {
 			// conversion
 			$this->columnsDecode($array, 'fetchAll', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
 			$this->columnsDecode($array, 'fetchAll', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// ---
+			$this->_cachedResult_value = $array;
 			return $array;
 		}
 		return ModelConfig::$fetchAll_nullValue;
@@ -128,12 +158,18 @@ class Statement extends StatementH {
 
 	public function fetchLine() {
 		$this->execute();
+		// --
+		if ($this->_cachedResult_value != Statement::NOVALUE) {
+			return $this->_cachedResult_value;
+		}
+		// --
 		$array = $this->_pdoStatement->fetch(\PDO::FETCH_ASSOC);
 		if (is_array($array)) {
 			// conversion
 			$this->columnsDecode($array, 'fetchLine', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
 			$this->columnsDecode($array, 'fetchLine', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// ---
+			$this->_cachedResult_value = $array;
 			return $array;
 		}
 		return null;
@@ -141,12 +177,18 @@ class Statement extends StatementH {
 
 	public function fetchOne() {
 		$this->execute();
+		// --
+		if ($this->_cachedResult_value != Statement::NOVALUE) {
+			return $this->_cachedResult_value;
+		}
+		// --
 		$array = $this->_pdoStatement->fetch(\PDO::FETCH_NUM);
 		if (is_array($array) && count($array)>0) {
 			// conversion
 			$this->columnsDecode($array[0], 'fetchOne', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
 			$this->columnsDecode($array[0], 'fetchOne', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// ---
+			$this->_cachedResult_value = $array[0];
 			return $array[0];
 		}
 		return null;
@@ -180,6 +222,11 @@ class Statement extends StatementH {
 
 	public function fetchObject($className, $constructorParams = null) {
 		$this->execute();
+		// --
+		if ($this->_cachedResult_value != Statement::NOVALUE) {
+			return $this->_cachedResult_value;
+		}
+		// --
 		if ($constructorParams) {
 			$object = $this->_pdoStatement->fetchObject($className, $constructorParams);
 		} else {
@@ -190,6 +237,7 @@ class Statement extends StatementH {
 			$this->columnsDecode($object, 'fetchObject', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
 			$this->columnsDecode($object, 'fetchObject', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// --
+			$this->_cachedResult_value = $object;
 			return $object;
 		}
 		return null;
@@ -197,6 +245,11 @@ class Statement extends StatementH {
 
 	public function fetchAllObjects($className, $constructorParams = null) {
 		$this->execute();
+		// --
+		if ($this->_cachedResult_value != Statement::NOVALUE) {
+			return $this->_cachedResult_value;
+		}
+		// --
 		if ($constructorParams) {
 			$array = $this->_pdoStatement->fetchAll(\PDO::FETCH_CLASS, $className, $constructorParams);
 		} else {
@@ -211,6 +264,7 @@ class Statement extends StatementH {
 			$this->columnsDecode($array, 'fetchAllObjects', $this->_jsonColumns, function($v) { return Utils::jsonDecode($v); });
 			$this->columnsDecode($array, 'fetchAllObjects', $this->_dateColumns, function($v) { return new DateTime($v); });
 			// --
+			$this->_cachedResult_value = $array;
 			return $array;
 		}
 		return ModelConfig::$fetchAll_nullValue;

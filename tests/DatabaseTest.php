@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use aphp\XPDO\Database;
 use aphp\XPDO\Utils;
@@ -30,12 +30,12 @@ class Time_object {
 }
 
 class DatabaseTest extends Base_TestCase {
-	
+
 	// STATIC
 	static $blobFile1 = '';
 	static $blobFile2 = '';
-	
-	static $jsonExample = 
+
+	static $jsonExample =
 '{
     "glossary": {
         "title": "example glossary",
@@ -74,16 +74,16 @@ class DatabaseTest extends Base_TestCase {
 		@unlink(self::$blobFile1);
 		@unlink(self::$blobFile2);
 	}
-	
+
 	protected function setUp()
     {
         Utils::$_jsonBindDetection = false;
         parent::setUp();
     }
-	
+
 	// tests
-	
-	public function test_fetchBlob() 
+
+	public function test_fetchBlob()
 	{
 		$db = Database::getInstance();
 
@@ -169,7 +169,7 @@ class DatabaseTest extends Base_TestCase {
 		$this->assertTrue( is_a($obj, User_object::class) );
 		$this->assertEquals( '1', $obj->id);
 		$this->assertEquals( 'p2', $obj->param2_v);
-		
+
 		$statement = $db->prepare("SELECT * FROM user LIMIT 2");
 		$objList = $statement->fetchAllObjects(User_object::class, [ 'p3', 'p4' ]);
 		$this->assertTrue( is_a($objList[1], User_object::class) );
@@ -221,11 +221,11 @@ class DatabaseTest extends Base_TestCase {
 			$this->assertTrue(true);
 		}
 	}
-	
+
 	public function test_JSON() {
 		Utils::$_jsonBindDetection = true;
 		$json = Utils::jsonDecode(self::$jsonExample);
-		
+
 		// fetchLine
 		$db = Database::getInstance();
 		$statement = $db->prepare("INSERT INTO user ( `name`, `email`, `gender`, `age` ) VALUES ( 'user_json01', ?, 3, 2.5 )");
@@ -238,49 +238,49 @@ class DatabaseTest extends Base_TestCase {
 		$statement->bindValues([
 			'user_json01'
 		]);
-		
+
 		$user = $statement->fetchLine();
-		
+
 		// windows line ending handling
 		$json_db = str_replace("\r", "", $user['email']);
 		$json_text = str_replace("\r", "", self::$jsonExample);
-		
+
 		$this->assertEquals( $json_text, $json_db );
-		
+
 		$statement = $db->prepare("SELECT * FROM user WHERE name = ?");
 		$statement->bindValues([
 			'user_json01'
 		]);
 		$statement->setJSONColumns([ 'email' ]);
 		$user = $statement->fetchLine();
-		
+
 		$this->assertEquals( $json, $user['email'] );
 		// bindNamedValue
-		
+
 		$statement = $db->prepare("INSERT INTO user ( `name`, `email`, `gender`, `age` ) VALUES ( 'user_json02', :json, 3, 2.5 )");
 		$statement->bindNamedValue( 'json', $json );
 		$statement->execute();
-		
+
 		$statement = $db->prepare("SELECT * FROM user WHERE name = :name");
 		$statement->bindNamedValue( 'name', 'user_json02' );
 		$user2 = $statement->fetchLine();
-		
+
 		$json_db = str_replace("\r", "", $user2['email']);
-		
+
 		$this->assertEquals( $json_text, $json_db );
-		
+
 		// fetchAllObjects
 		$statement = $db->prepare("SELECT * FROM user WHERE name = ? OR name = ?");
 		$statement->bindValues([
 			'user_json01', 'user_json02'
 		]);
 		$statement->setJSONColumns([ 'email' ]);
-		
+
 		$users = $statement->fetchAllObjects(User_object::class);
-		
+
 		$this->assertEquals( $json, $users[0]->email );
 		$this->assertEquals( $json, $users[1]->email );
-		
+
 		// fetchAll
 		$statement = $db->prepare("SELECT * FROM user WHERE name = ? OR name = ?");
 		$statement->bindValues([
@@ -288,10 +288,10 @@ class DatabaseTest extends Base_TestCase {
 		]);
 		$statement->setJSONColumns([ 'email' ]);
 		$users = $statement->fetchAll();
-		
+
 		$this->assertEquals( $json, $users[0]['email'] );
 		$this->assertEquals( $json, $users[1]['email'] );
-		
+
 		// fetchOne
 		$statement = $db->prepare("SELECT email FROM user WHERE name = ?");
 		$statement->bindValues([
@@ -308,7 +308,7 @@ class DatabaseTest extends Base_TestCase {
 		$time = new DateTime('13:55:59');
 		$dateTime = new DateTime('2019-10-22 13:55:59');
 		$dateTime2 = new DateTime('2019-11-22 14:55:59');
-		
+
 		// insert
 		$statement = $db->prepare("INSERT INTO timeTable ( `name`, `v_dateTime`, `v_date`, `v_time` ) VALUES ( 'name001', ?, ?, ? )");
 		$statement->bindValues([
@@ -328,7 +328,7 @@ class DatabaseTest extends Base_TestCase {
 		$statement->bindValues([
 			'name001'
 		]);
-		
+
 		$timeValue = $statement->fetchLine();
 		$this->assertTrue( $timeValue['v_dateTime'] == '2019-10-22 13:55:59' );
 		$this->assertTrue( $timeValue['v_date'] == '2019-10-22' );
@@ -340,7 +340,7 @@ class DatabaseTest extends Base_TestCase {
 		$statement->bindValues([
 			'name002'
 		]);
-		
+
 		$timeValue = $statement->fetchAll();
 		$this->assertTrue( is_a($timeValue[0]['v_date'], DateTime::class) );
 		$this->assertTrue( $timeValue[0]['v_dateTime']->getText() == '2019-11-22 14:55:59' );
@@ -351,7 +351,7 @@ class DatabaseTest extends Base_TestCase {
 		$statement->bindValues([
 			'name002'
 		]);
-		
+
 		$timeValue = $statement->fetchOne();
 		$this->assertTrue( is_a($timeValue, DateTime::class) );
 		$this->assertTrue( $timeValue->getText() == '2019-11-22 14:55:59' );
@@ -366,5 +366,56 @@ class DatabaseTest extends Base_TestCase {
 		$this->assertTrue( is_a($obj->v_time, DateTime::class) );
 		$this->assertTrue( $obj->v_dateTime->getText() == '2019-10-22 13:55:59' );
 	}
+
+	// Cache test
+
+	public function test_cache() {
+		$db = Database::getInstance();
+		$db->setFetchCacheEnabled(true);
+
+		$statement = $db->prepare('SELECT id, name FROM user WHERE id = 1');
+		$statement->__testID = '__testID1';
+		$this->assertTrue( $statement->_cached == true );
+
+		$user = $statement->fetchLine();
+		$this->assertTrue( $user['id'] == 1 );
+
+		// --
+		$statement2 = $db->prepare('SELECT id, name FROM user WHERE id = 1');
+		$this->assertTrue( isset($statement2->__testID) );
+		$this->assertTrue( $statement2->__testID == '__testID1' );
+
+		$user = $statement2->fetchLine();
+		$this->assertTrue( $user['id'] == 1 );
+
+		$statement2->_cachedResult_value = 'TEST VALUE';
+
+		$v = $statement2->fetchAll();
+		$this->assertTrue( $v == 'TEST VALUE' );
+		$v = $statement2->fetchLine();
+		$this->assertTrue( $v == 'TEST VALUE' );
+		$v = $statement2->fetchOne();
+		$this->assertTrue( $v == 'TEST VALUE' );
+		$v = $statement2->fetchObject('className');
+		$this->assertTrue( $v == 'TEST VALUE' );
+		$v = $statement2->fetchAllObjects('className');
+		$this->assertTrue( $v == 'TEST VALUE' );
+
+		// --
+		// resetFetchCache
+		$this->assertTrue( count($db->_fetchCache) == 1 );
+
+		$statement3 = $db->prepare('UPDATE user SET name="hello" WHERE id=100');
+		$this->assertTrue( $statement3->_cached == false );
+		$this->assertTrue( count($db->_fetchCache) == 0 );
+
+		$statement4 = $db->prepare('SELECT id, name FROM user WHERE id = 1');
+		$this->assertTrue( !isset($statement4->__testID) );
+		$this->assertTrue( $statement4->_cached == true );
+
+		$db->setFetchCacheEnabled(false);
+
+		$statement5 = $db->prepare('SELECT id, name FROM user WHERE id = 50');
+		$this->assertTrue( $statement5->_cached == false );
+	}
 }
-	

@@ -9,6 +9,7 @@ namespace aphp\XPDO;
 abstract class DatabaseH {
 	abstract public function SQLiteInit($fileName);
 	abstract public function MySQLInit($user, $password, $dbname, $host = 'localhost');
+	abstract public function PDOInit(\PDO $pdo, $type = '_isMYSQL');
 
 	abstract public function prepare($queryString); // aphp\XPDO\Statement;
 	abstract public function exec($queryString); // int
@@ -49,15 +50,19 @@ class Database extends DatabaseH {
 
 	// PUBLIC
 	public function SQLiteInit($fileName) {
-		$this->_pdo = new \PDO('sqlite:'.$fileName);
-		$this->_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		$this->_isSQLite = true;
+		$pdo = new \PDO('sqlite:'.$fileName);
+		$this->PDOInit($pdo , '_isSQLite');
 	}
 
 	public function MySQLInit($user, $password, $dbname, $host = 'localhost') {
-		$this->_pdo = new \PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $password);
+		$pdo = new \PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $password);
+		$this->PDOInit($pdo , '_isMYSQL');
+	}
+
+	public function PDOInit(\PDO $pdo, $type = '_isMYSQL') {
+		$this->_pdo = $pdo;
 		$this->_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		$this->_isMYSQL = true;
+		$this->{$type} = true;
 	}
 
 	public function prepare($queryString) {

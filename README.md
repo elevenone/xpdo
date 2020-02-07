@@ -108,6 +108,14 @@ $db = Database::getInstance();
 $db->SQLiteInit('sampleBase-temp.sqlite');
 // --
 $db->MySQLInit($user, $password, $database, 'localhost');
+
+// -- PDO custom instance initialization
+// -- - useful for custom ports or any other params
+$pdo = new \PDO("mysql:host=localhost;dbname=dbname;charset=utf8mb4", $user, $password);
+$db->PDOInit($pdo, '_isMYSQL');
+// OR
+$pdo = new \PDO('sqlite:'. $fileName);
+$db->PDOInit($pdo, '_isSQLite');
 ```
 ### Logger
 ```php

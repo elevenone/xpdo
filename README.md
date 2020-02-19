@@ -1,7 +1,7 @@
 # XPDO
 
-![PHP Support](https://img.shields.io/badge/php%20tested-5.6-brightgreen.svg)
-![PHP Support](https://img.shields.io/badge/php%20tested-7-brightgreen.svg)
+![PHP Support](https://img.shields.io/badge/php-5.6-brightgreen.svg)
+![PHP Support](https://img.shields.io/badge/php-7-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Travis](https://api.travis-ci.org/GonistLelatel/xpdo.svg?branch=master)
 
@@ -12,9 +12,8 @@
 Supporting: MySQL, SQLite.
 
 ## Installation
-PHP5.6 , PHP7.0+
 
-`composer require aphp/xpdo`
+`composer require aphp/xpdo ~1.0.0`
 
 ## Features
 
@@ -112,10 +111,10 @@ $db->MySQLInit($user, $password, $database, 'localhost');
 // -- PDO custom instance initialization
 // -- - useful for custom ports or any other params
 $pdo = new \PDO("mysql:host=localhost;dbname=dbname;charset=utf8mb4", $user, $password);
-$db->PDOInit($pdo, '_isMYSQL');
+$db->PDOInit($pdo);
 // OR
 $pdo = new \PDO('sqlite:'. $fileName);
-$db->PDOInit($pdo, '_isSQLite');
+$db->PDOInit($pdo);
 ```
 ### Logger
 ```php
@@ -791,12 +790,17 @@ On linux use *.sh files like *.bat files
 <details><summary><b>&#x1F535; Useful links</b></summary>
 <p>
 
-* CMD windows
+* Composer package generator
+	* [projectGen2](https://github.com/GonistLelatel/projectGen2)
+* Cmd windows
 	* [WindowsPathEditor](https://rix0rrr.github.io/WindowsPathEditor/)
 	* [conemu](https://conemu.github.io/)
-* PHP in CMD
+* PHP downloads
 	* [windows.php.net](https://windows.php.net/)
 	* [xampp](https://www.apachefriends.org/ru/index.html)
+	* [openserver](https://open-server.soft112.com/)
+* PHP installations
+	* [install-php-on-windows](https://www.utilizewindows.com/install-php-on-windows/)
 	* [phpunit 5](https://phpunit.de/getting-started/phpunit-5.html)
 	* [phpunit in bat](https://stackoverflow.com/questions/24861233/phpunit-setup-in-batch-file)
 	* [composer in bat](http://leedavis81.github.io/global-installation-of-composer-on-windows/)
@@ -809,6 +813,6 @@ On linux use *.sh files like *.bat files
 
 ## More features
 For more features:
-* read source code and examples
-* practice with `XPDO` in real code
+* Read source code and examples
+* Practice with `XPDO` in real code
 

@@ -9,7 +9,7 @@ namespace aphp\XPDO;
 abstract class DatabaseH {
 	abstract public function SQLiteInit($fileName);
 	abstract public function MySQLInit($user, $password, $dbname, $host = 'localhost');
-	abstract public function PDOInit(\PDO $pdo, $type = '_isMYSQL');
+	abstract public function PDOInit(\PDO $pdo);
 
 	abstract public function prepare($queryString); // aphp\XPDO\Statement;
 	abstract public function exec($queryString); // int
@@ -18,6 +18,7 @@ abstract class DatabaseH {
 	abstract public function isMYSQL();
 	abstract public function isSQLite();
 	abstract public function getPDO(); // PDO
+	abstract public function getDriverName(); // mysql, sqlite
 
 	abstract public function setFetchCacheEnabled($enabled);
 	abstract public function resetFetchCache();
@@ -44,25 +45,22 @@ class Database extends DatabaseH {
 
 	// PROTECTED
 	protected $_pdo = null; // PDO
-	protected $_isMYSQL = false;
-	protected $_isSQLite = false;
 	public $_fetchCache = null;
 
 	// PUBLIC
 	public function SQLiteInit($fileName) {
 		$pdo = new \PDO('sqlite:'.$fileName);
-		$this->PDOInit($pdo , '_isSQLite');
+		$this->PDOInit($pdo);
 	}
 
 	public function MySQLInit($user, $password, $dbname, $host = 'localhost') {
 		$pdo = new \PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $password);
-		$this->PDOInit($pdo , '_isMYSQL');
+		$this->PDOInit($pdo);
 	}
 
-	public function PDOInit(\PDO $pdo, $type = '_isMYSQL') {
+	public function PDOInit(\PDO $pdo) {
 		$this->_pdo = $pdo;
 		$this->_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		$this->{$type} = true;
 	}
 
 	public function prepare($queryString) {
@@ -108,11 +106,11 @@ class Database extends DatabaseH {
 	}
 
 	public function isMYSQL() {
-		return $this->_isMYSQL;
+		return $this->getDriverName() == 'mysql';
 	}
 
 	public function isSQLite() {
-		return $this->_isSQLite;
+		return $this->getDriverName() == 'sqlite';
 	}
 
 	public function getPDO() {
@@ -120,6 +118,11 @@ class Database extends DatabaseH {
 			return $this->_pdo;
 		}
 		throw XPDOException::pdoIsNull();
+	}
+
+	public function getDriverName() {
+		$driver = $this->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+		return $driver;
 	}
 
 	public function setFetchCacheEnabled($enabled) {

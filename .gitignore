@@ -6,3 +6,4 @@ composer.lock
 *temp02.sqlite
 tests/logs
 dev-dir
+example/sampleBase.sqlite

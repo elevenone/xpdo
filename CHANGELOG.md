@@ -3,6 +3,10 @@
 ## Future
 * Documentation, test and code cleanup.
 
+## 1.0.18 - 2020-02-19
+
+* Added PDO driver name.
+
 ## 1.0.17 - 2020-02-07
 
 * Added PDO custom initialization.

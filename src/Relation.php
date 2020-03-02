@@ -103,6 +103,7 @@ class Relation extends RelationH
 				$s->relationClass1Field2 = $match2[1];
 				
 				$s->relationClass2Field = $match2[3];
+				/** @var Database db */
 				$s->db = $modelClass::database();
 				$s->modelTable = $modelClass::tableName();
 				$s->table1 = $relationClass1::tableName();
@@ -114,6 +115,7 @@ class Relation extends RelationH
 					//
 					$fields = Utils::selectColumns($this->__paramFields, $s->table2);
 					//
+					/** @var Statement $statement */
 					$statement = $s->db->prepare(
 "SELECT $fields 
 FROM `{$s->table1}`, `{$s->table2}` 
@@ -135,6 +137,7 @@ WHERE
 					Relation::notNullField( $s->relationClass2Field, $relationModel->{$s->relationClass2Field} );
 					Relation::notNullField( $s->modelField, $model->{$s->modelField} );
 					//
+					/** @var Model $middle */
 					$middle = $relationClass1::loadWithWhereQuery(
 						"`{$s->relationClass1Field1}` = :modelValue AND `{$s->relationClass1Field2}` = :relationValue",
 						['modelValue' => $model->{$s->modelField}, 'relationValue' => $relationModel->{$s->relationClass2Field}]
@@ -149,6 +152,7 @@ WHERE
 
 				$this->__functions_remove[$name] = function($model, $relationModel) use($s) 
 				{
+					/** @var Statement $statement */
 					$statement = $s->db->prepare(
 "DELETE FROM `{$s->table1}` WHERE `{$s->relationClass1Field1}` = :modelValue AND `{$s->relationClass1Field2}` = :relationValue"
 					);
@@ -320,7 +324,7 @@ WHERE
 			return $result;
 		}
 		throw XPDOException::undefinedRelation($name);
-		return null;
+		//return null;
 	}
 // Exceptions
 	static function notNullField($field, $value) {

@@ -31,8 +31,26 @@ abstract class DateTimeH
 
 class DateTime extends DateTimeH
 {
-	public function __construct($text = null) {
-		$this->setText($text);
+	const DATE_FORMAT = 'Y-m-d H:i:s';
+
+	/**
+	 * DateTime constructor.
+	 * @param string $text 'now_dt', 'now_t', 'now_d' or '1970-01-01 00:00:00' format
+	 */
+
+	public function __construct($text = null)
+	{
+		if ($text == 'now_dt') {
+			$this->setNow('dt');
+		}
+		elseif ($text == 'now_d') {
+			$this->setNow('d');
+		}
+		elseif ($text == 'now_t') {
+			$this->setNow('t');
+		} else {
+			$this->setText($text);
+		}
 	}
 	
 	public function isTimeText($text) 
@@ -57,7 +75,8 @@ class DateTime extends DateTimeH
 			$this->isDateText(substr($text, 0, 10)) && $this->isTimeText(substr($text, 11));
 	}
 // set Date
-	public function setText($text) {
+	public function setText($text)
+	{
 		if ($this->isDateText($text)) {
 			$this->date = $text;
 			$this->time = null;
@@ -72,19 +91,24 @@ class DateTime extends DateTimeH
 			$this->time = null;
 		}
 	}
-	public function getText() {
+	public function getText()
+	{
 		if ($this->date && $this->time) return $this->date . ' ' . $this->time;
 		if ($this->date) return $this->date;
 		if ($this->time) return $this->time;
 		return null;
 	}
-// set timestamp
-	public function setNow($dt = null) {
+
+	// set timestamp
+	public function setNow($dt = null)
+	{
 		$this->setTimestamp(time(), $dt);
 	}
-	public function setTimestamp($timestamp, $dt = null) {
+
+	public function setTimestamp($timestamp, $dt = null)
+	{
 		if (is_int($timestamp)) {
-			$text = date('Y-m-d H:i:s', $timestamp);
+			$text = date(self::DATE_FORMAT, $timestamp);
 			$this->date = null;
 			$this->time = null;
 			if (!$dt) $dt = $this->getDT();
@@ -96,15 +120,24 @@ class DateTime extends DateTimeH
 		}
 	}
 // get timestamp
-	public function getPHPDateTime() {
-		// dateTime is supported only 
-		if ($this->getDT() != 'dt') { return null; }
-		$date = \DateTime::createFromFormat('Y-m-d H:i:s', $this->getText() );
+	public function getPHPDateTime()
+	{
+		if ($this->getDT() == 'dt') {
+			$date = \DateTime::createFromFormat(self::DATE_FORMAT, $this->getText() );
+		}
+		elseif ($this->getDT() == 'd') {
+			$date = \DateTime::createFromFormat(self::DATE_FORMAT, $this->date . ' 00:00:00' );
+		}
+		elseif ($this->getDT() == 't') {
+			$date = \DateTime::createFromFormat(self::DATE_FORMAT, '1970-01-01 ' . $this->time );
+		} else {
+			return new \DateTime('@0');
+		}
 		return $date;
 	}
-	public function getTimestamp() {
-		// dateTime is supported only
-		if ($this->getDT() != 'dt') { return null; }
+
+	public function getTimestamp()
+	{
 		return $this->getPHPDateTime()->getTimestamp();
 	}
 }

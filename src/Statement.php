@@ -6,6 +6,13 @@ namespace aphp\XPDO;
 # Header
 # ------------------------------------
 
+/**
+ * IDE type hints
+ *
+ * @property \PDOStatement $_pdoStatement
+ * @property Database $_database
+ */
+
 abstract class StatementH {
 	const TYPE_JSON = 'json';
 	const TYPE_DATE = 'date';
@@ -23,27 +30,83 @@ abstract class StatementH {
 	public $_cachedResult = [];
 	public $_cachedResult_value = StatementH::NOVALUE;
 
-	abstract public function bindNamedValue($name, $value); // Statement
-	abstract public function bindNamedValues($params); // Statement, $params = array()
-	abstract public function bindValues($params);      // Statement, $params = array()
+	/**
+	 * @return Statement
+	 */
+	abstract public function bindNamedValue($name, $value);
 
+	/**
+	 * @param array $params
+	 * @return Statement
+	 */
+	abstract public function bindNamedValues($params);
+
+	/**
+	 * @param array $params
+	 * @return Statement
+	 */
+	abstract public function bindValues($params);
+
+	/**
+	 * @return Statement
+	 */
 	abstract public function setJSONColumns($colums); // $colums = array()
+
+	/**
+	 * @return Statement
+	 */
 	abstract public function setDateColumns($colums);
 
+	/**
+	 * @return Statement
+	 */
 	abstract public function execute(); // Statement
 
+	/**
+	 * @return array
+	 */
 	abstract public function fetchAll(); // array[row][column] OR (ModelConfig::$fetchAll_nullValue)
+
+	/**
+	 * @return array
+	 */
 	abstract public function fetchLine(); // array[column] OR null
+
+	/**
+	 * @return mixed|null
+	 */
 	abstract public function fetchOne(); // value OR null
+
+	/**
+	 * @return mixed|null
+	 */
 	abstract public function fetchLastId($table, $idColumn); // value OR null
 
 	// Blob interface
-	abstract public function bindNamedBlob($name, &$blob); // Statement
-	abstract public function bindNamedBlobAsFilename($name, $filename); // Statement
+	/**
+	 * @return Statement
+	 */
+	abstract public function bindNamedBlob($name, &$blob);
+
+	/**
+	 * @return Statement
+	 */
+	abstract public function bindNamedBlobAsFilename($name, $filename);
+
+	/**
+	 * @return Statement
+	 */
 	abstract public function fetchBlob($columnName, &$blob); // true OR false
 
 	// Object Interface
+	/**
+	 * @return object|null
+	 */
 	abstract public function fetchObject($className, $constructorParams = null); // object OR null
+
+	/**
+	 * @return array
+	 */
 	abstract public function fetchAllObjects($className, $constructorParams = null); // [object] OR (ModelConfig::$fetchAll_nullValue)
 }
 
@@ -202,6 +265,7 @@ class Statement extends StatementH {
 
 	public function bindNamedBlob($name, &$blob) {
 		$this->_pdoStatement->bindParam($name, $blob, \PDO::PARAM_LOB);
+		return $this;
 	}
 
 	public function bindNamedBlobAsFilename($name, $filename) {
@@ -209,7 +273,7 @@ class Statement extends StatementH {
 		if ($fp === false) {
 			throw XPDOException::bindNamedBlobAsFilenameException($name, $this->_query, $filename);
 		}
-		$this->bindNamedBlob($name, $fp);
+		return $this->bindNamedBlob($name, $fp);
 	}
 
 	public function fetchBlob($columnName, &$blob) { // true OR false

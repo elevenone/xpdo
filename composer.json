@@ -18,5 +18,9 @@
 		"psr-4": {
 			"aphp\\XPDO\\" : "src/"
 		}
+	},
+	"scripts": {
+		"test_sqlite": "phpunit -c tests/phpunit.xml --bootstrap tests/bootstrap_autoload.php tests --debug",
+		"test_mysql": "phpunit -c tests/phpunit.xml --bootstrap tests/bootstrap_autoload_mysql.php tests --debug"
 	}
 }

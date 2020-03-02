@@ -24,12 +24,18 @@ abstract class ModelH {
 		$rf = new \ReflectionClass( get_called_class() );
 		return \strtolower( $rf->getShortName() );
 	}
+
+	/**
+	 * @return Database
+	 */
 	static function database() {
 		return Database::getInstance();
 	}
+
 	static function relations() {
 		return [];
 	}
+
 	// STATIC
 	static $_fields = []; // [className] = [ field, field, field ]
 
@@ -57,6 +63,10 @@ abstract class ModelH {
 	abstract public function save($fields = []);
 	abstract public function delete();
 
+	/**
+	 * @return Relation
+	 */
+
 	abstract public function relation(); // Relation
 }
 
@@ -64,11 +74,19 @@ abstract class ModelH {
 # Model
 # ------------------------------------
 
-class Model extends ModelH {
+class Model extends ModelH
+{
 
 	const LOADED_WITH_DB = true;
 
 	// PRIVATE
+
+	/**
+	 * @param string $SQLWhere
+	 * @param array $params
+	 * @param array $fields
+	 * @return Statement
+	 */
 
 	private static function statementWithWhereQuery($SQLWhere, $params,  $fields) { // Statement
 		$db = static::database();
@@ -143,21 +161,46 @@ class Model extends ModelH {
 
 	// --
 
+	/**
+	 * @param string $SQLWhere
+	 * @param array $params
+	 * @param array $fields
+	 * @return self|null
+	 */
+
 	static function loadWithWhereQuery($SQLWhere, $params = [],  $fields = []) { // Model or null
 		$SQLWhere .= ' LIMIT 1';
 		$s = self::statementWithWhereQuery($SQLWhere, $params, $fields);
 		return $s->fetchObject( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
+	/**
+	 * @param string $SQLWhere
+	 * @param array $params
+	 * @param array $fields
+	 * @return array
+	 */
+
 	static function loadAllWithWhereQuery($SQLWhere, $params = [],  $fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 		$statement = self::statementWithWhereQuery($SQLWhere, $params, $fields);
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
+	/**
+	 * @param array $fields
+	 * @return array
+	 */
+
 	static function loadAll($fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 		$statement = self::statementWithWhereQuery(null, [], $fields);
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
+
+	/**
+	 * @param Statement $statement
+	 * @param array $fields
+	 * @return self|null
+	 */
 
 	static function loadWithStatement(Statement $statement, $fields = []) { // Model or null
 		// conversion
@@ -167,6 +210,12 @@ class Model extends ModelH {
 		return $statement->fetchObject( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
 
+	/**
+	 * @param Statement $statement
+	 * @param array $fields
+	 * @return array
+	 */
+
 	static function loadAllWithStatement(Statement $statement, $fields = []) { // [ Model ] or (ModelConfig::$fetchAll_nullValue)
 		// conversion
 		$statement->setJSONColumns( static::jsonFields() );
@@ -174,6 +223,14 @@ class Model extends ModelH {
 		// --
 		return $statement->fetchAllObjects( get_called_class() , [ self::LOADED_WITH_DB, $fields ]);
 	}
+
+	/**
+	 * @param string $field
+	 * @param mixed $value
+	 * @param array $fields
+	 * @param bool $newModel
+	 * @return self|null
+	 */
 
 	static function loadWithField( $field, $value, $fields = [],  $newModel = false ) { // Model or null
 		$SQLWhere = Utils::quoteColumns($field) . ' = ?';
@@ -184,6 +241,13 @@ class Model extends ModelH {
 		}
 		return $model;
 	}
+
+	/**
+	 * @param mixed $value
+	 * @param array $fields
+	 * @param bool $newModel
+	 * @return self|null
+	 */
 
 	static function loadWithId( $value, $fields = [],  $newModel = false ) { // Model or null
 		if (static::keyField() == null) {

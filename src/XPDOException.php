@@ -51,4 +51,7 @@ class XPDOException extends AException {
 	static function nullField($field) { // OK
 		return self::create(sprintf('Field value "%s" is null', $field));
 	}
+	static function invalidType($text) { // OK
+		return self::create($text);
+	}
 }

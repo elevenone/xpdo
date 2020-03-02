@@ -6,19 +6,50 @@ namespace aphp\XPDO;
 # Header
 # ------------------------------------
 
-abstract class DatabaseH {
+abstract class DatabaseH
+{
 	abstract public function SQLiteInit($fileName);
 	abstract public function MySQLInit($user, $password, $dbname, $host = 'localhost');
 	abstract public function PDOInit(\PDO $pdo);
 
-	abstract public function prepare($queryString); // aphp\XPDO\Statement;
-	abstract public function exec($queryString); // int
-	abstract public function fetchLastId($table, $idColumn); // value OR null ??
+	/**
+	 * @param string $queryString
+	 * @return Statement
+	 */
+	abstract public function prepare($queryString);
 
+	/**
+	 * @param string $queryString
+	 * @return integer
+	 */
+	abstract public function exec($queryString);
+
+	/**
+	 * @param string $table
+	 * @param string $idColumn
+	 * @return mixed|null
+	 */
+	abstract public function fetchLastId($table, $idColumn);
+
+	/**
+	 * @return bool
+	 */
 	abstract public function isMYSQL();
+
+	/**
+	 * @return bool
+	 */
 	abstract public function isSQLite();
+
+	/**
+	 * @return \PDO
+	 */
 	abstract public function getPDO(); // PDO
-	abstract public function getDriverName(); // mysql, sqlite
+
+	/**
+	 * @return string mysql,sqlite
+	 */
+	abstract public function getDriverName();
 
 	abstract public function setFetchCacheEnabled($enabled);
 	abstract public function resetFetchCache();
@@ -44,7 +75,10 @@ class Database extends DatabaseH {
 	use \Psr\Log\LoggerAwareTrait; // trait
 
 	// PROTECTED
-	protected $_pdo = null; // PDO
+
+	/** @var \PDO */
+	protected $_pdo = null;
+
 	public $_fetchCache = null;
 
 	// PUBLIC
